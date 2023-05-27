@@ -20,6 +20,7 @@ pub struct RenderData {
     // These may be part of the texture in the future when I work out what to do with them
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
+    bind_group_two: wgpu::BindGroup,
 }
 
 // Temp, to be removed
@@ -46,7 +47,7 @@ const VERTICES: &[Vertex2D] = &[
     }, // E
 ];
 
-const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /**/ 2, 3, 4];
 
 impl RenderData {
     pub async fn new(window: Window) -> Self {
@@ -75,8 +76,13 @@ impl RenderData {
             )
             .await
             .unwrap();
+        // Multiple textures, all sharing bind group layout.....
+        // each have separate bind group, bind group should be moved to Texture struct,
+        // should be a function which provides a bind group layout with these parameters, or we create it here,
+        // then store it in state for reuse
         let tex = texture::Texture2D::new("src/assets/yharon.png", &queue, &device).unwrap();
-        let textures = vec![tex];
+        let tex_two = texture::Texture2D::new("src/assets/calamitas.png", &queue, &device).unwrap();
+        let textures = vec![tex, tex_two];
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Texture bind group layout"),
             entries: &[
@@ -110,6 +116,21 @@ impl RenderData {
                 wgpu::BindGroupEntry {
                     binding: 1,
                     resource: wgpu::BindingResource::Sampler(textures.first().unwrap().sampler()),
+                },
+            ],
+        });
+
+        let bind_group_two = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Bind Group Layout"),
+            layout: &bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(textures.last().unwrap().view()),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(textures.last().unwrap().sampler()),
                 },
             ],
         });
@@ -217,6 +238,7 @@ impl RenderData {
             textures,
             bind_group,
             bind_group_layout,
+            bind_group_two,
         }
     }
 
@@ -246,11 +268,16 @@ impl RenderData {
             });
             render_pass.set_pipeline(&self.pipeline);
             render_pass.set_bind_group(0, &self.bind_group, &[]);
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
-            //render_pass.set_vertex_buffer(1, self.vertex_buffer.slice(..));
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.index_count, 0, 0..1)
+            render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+
+            render_pass.set_bind_group(0, &self.bind_group_two, &[]);
+
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..3, 0, 0..1)
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();
