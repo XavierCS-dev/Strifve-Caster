@@ -1,9 +1,14 @@
+use super::actors::entity::Entity2D;
+use super::traits::update_textures::UpdateTextures;
+use crate::engine::advanced_types::texture_vecs::Texture2DMap;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
 use crate::engine::texture::Texture2D;
 use bytemuck;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
 use winit::window::Window;
+use crate::engine::actors::entity::RawEntity2D;
+use std::collections::HashMap;
 
 pub struct RenderData {
     device: wgpu::Device,
@@ -16,11 +21,14 @@ pub struct RenderData {
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     index_count: u32,
-    textures: Vec<Texture2D>,
+    textures: Texture2DMap,
     // These may be part of the texture in the future when I work out what to do with them
-    bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
-    bind_group_two: wgpu::BindGroup,
+    // Will need to separate walls and sprites here... possibly different Hashmaps.
+    // eg, wall_entities, sprite entities, separate loops iterating through them, with sprites coming after1
+    // K: TextureID, V: Batch of entities
+    entities: HashMap<u32, Vec<Entity2D>>,
+    entity_buffer: wgpu::Buffer,
 }
 
 // Temp, to be removed
@@ -80,9 +88,7 @@ impl RenderData {
         // each have separate bind group, bind group should be moved to Texture struct,
         // should be a function which provides a bind group layout with these parameters, or we create it here,
         // then store it in state for reuse
-        let tex = texture::Texture2D::new("src/assets/yharon.png", &queue, &device).unwrap();
-        let tex_two = texture::Texture2D::new("src/assets/calamitas.png", &queue, &device).unwrap();
-        let textures = vec![tex, tex_two];
+
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Texture bind group layout"),
             entries: &[
@@ -104,36 +110,31 @@ impl RenderData {
                 },
             ],
         });
+        let tex =
+            texture::Texture2D::new("src/assets/yharon.png", &queue, &device, &bind_group_layout)
+                .unwrap();
+        let tex_two = texture::Texture2D::new(
+            "src/assets/calamitas.png",
+            &queue,
+            &device,
+            &bind_group_layout,
+        )
+        .unwrap();
+        let mut textures = Texture2DMap::new();
+        textures.add_texture(tex);
+        textures.add_texture(tex_two);
 
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Bind Group Layout"),
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(textures.first().unwrap().view()),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(textures.first().unwrap().sampler()),
-                },
-            ],
-        });
 
-        let bind_group_two = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Bind Group Layout"),
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(textures.last().unwrap().view()),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(textures.last().unwrap().sampler()),
-                },
-            ],
-        });
+        // TEMPORARY
+        let entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
+        let entity_vec = entities.iter().map(|x| x.1).flatten().map(|z| z.to_raw()).collect::<Vec<RawEntity2D>>();
+        let entity_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Entity Buffer"),
+                contents: bytemuck::cast_slice(&entity_vec),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),
@@ -164,22 +165,7 @@ impl RenderData {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<Vertex2D>() as wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &[
-                        wgpu::VertexAttribute {
-                            format: wgpu::VertexFormat::Float32x2,
-                            offset: 0,
-                            shader_location: 0,
-                        },
-                        wgpu::VertexAttribute {
-                            format: wgpu::VertexFormat::Float32x2,
-                            offset: std::mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
-                            shader_location: 1,
-                        },
-                    ],
-                }],
+                buffers: &[Vertex2D::descriptor(), RawEntity2D::descriptor()],
             },
             primitive: wgpu::PrimitiveState {
                 // may want to change this to line list for raycaster...
@@ -236,9 +222,9 @@ impl RenderData {
             index_buffer,
             index_count,
             textures,
-            bind_group,
             bind_group_layout,
-            bind_group_two,
+            entities,
+            entity_buffer,
         }
     }
 
@@ -266,18 +252,26 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
-            render_pass.set_pipeline(&self.pipeline);
-            render_pass.set_bind_group(0, &self.bind_group, &[]);
 
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+            let mut iter_pos = 0;
+            for tex in self.textures.inner() {
+                println!("{}", tex.0);
+                render_pass.set_pipeline(&self.pipeline);
+                render_pass.set_bind_group(0, tex.1.bind_group(), &[]);
 
-            render_pass.set_bind_group(0, &self.bind_group_two, &[]);
+                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+                render_pass
+                    .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                // render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+                if iter_pos == 0 {
+                    render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+                    iter_pos += 1;
+                    continue;
+                }
 
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..3, 0, 0..1)
+                render_pass.draw_indexed(0..3, 0, 0..1);
+                iter_pos += 1;
+            }
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();

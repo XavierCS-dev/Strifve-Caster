@@ -1,16 +1,34 @@
+use crate::engine::advanced_types::texture_vecs::Texture2DMap;
+use crate::engine::primitives::vertex::Vertex2D;
 use anyhow::Result;
-use std::{fs::File, io, io::BufReader, io::Read};
+use rand::Rng;
+use std::{collections::HashSet, fs::File, io, io::BufReader, io::Read, sync::Mutex};
 
 use image::GenericImageView;
 
+/// Contains a list of texture IDs. Only intended to be used by advanced users.
+pub static mut TEXTURE_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
+#[derive(Debug)]
 pub struct Texture2D {
+    id: u32,
     diffuse_texture: wgpu::Texture,
     sampler: wgpu::Sampler,
     view: wgpu::TextureView,
+    bind_group: wgpu::BindGroup,
+    rgba_buffer: image::RgbaImage,
+    dimensions: wgpu::Extent3d,
 }
 
 impl Texture2D {
-    pub fn new(file_path: &str, queue: &wgpu::Queue, device: &wgpu::Device) -> Result<Self> {
+    pub fn new(
+        file_path: &str,
+        queue: &wgpu::Queue,
+        device: &wgpu::Device,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Result<Self> {
+        // POSSIBLY CHANGE CREATING TEXTURE TO CREATE A TEXTURE AND ADD IT TO THE HASHMAP, RETURN ID INSTEAD OF SELF
+        let id = unsafe { Texture2D::create_id() };
         let mut byte_vec: Vec<u8> = Vec::new();
         let file = File::open(file_path)?;
         let mut buf_reader = BufReader::new(file);
@@ -66,31 +84,9 @@ impl Texture2D {
             ..Default::default()
         });
 
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Texture bind group layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-        });
-
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Bind Group Layout"),
-            layout: &bind_group_layout,
+            layout: bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
@@ -102,11 +98,14 @@ impl Texture2D {
                 },
             ],
         });
-
         Ok(Self {
+            id,
             diffuse_texture,
             sampler: texture_sampler,
             view: texture_view,
+            bind_group,
+            rgba_buffer,
+            dimensions: texture_dimensions,
         })
     }
 
@@ -120,5 +119,33 @@ impl Texture2D {
 
     pub fn sampler(&self) -> &wgpu::Sampler {
         &self.sampler
+    }
+
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.bind_group
+    }
+
+    pub fn rgba_buffer(&self) -> &image::RgbaImage {
+        &self.rgba_buffer
+    }
+
+    pub fn dimensions(&self) -> wgpu::Extent3d {
+        self.dimensions
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Creates and adds and ID to TextureIDs. Can cause TextureIDs to leak IDs.
+    unsafe fn create_id() -> u32 {
+        let mut num = rand::thread_rng().gen_range(0..std::u32::MAX);
+        let mut tex_ids = TEXTURE_IDS.lock().unwrap();
+        while tex_ids.contains(&num) {
+            num = rand::thread_rng().gen_range(0..std::u32::MAX);
+        }
+        tex_ids.push(num);
+        drop(tex_ids);
+        num
     }
 }
