@@ -26,11 +26,11 @@ impl Transformation2D {
         self.scale[1][1] = scale;
     }
 
-    pub fn rotation(&self) -> [[f32;2];2] {
+    pub fn rotation(&self) -> [[f32; 2]; 2] {
         self.rotation
     }
 
-    pub fn scale(&self) -> [[f32;2];2] {
+    pub fn scale(&self) -> [[f32; 2]; 2] {
         self.scale
     }
 }

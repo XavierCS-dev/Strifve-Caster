@@ -1,17 +1,17 @@
 use super::actors::entity::Entity2D;
 use super::traits::update_textures::UpdateTextures;
+use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::texture_vecs::Texture2DMap;
+use crate::engine::primitives::vector::Vector2;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
 use crate::engine::texture::Texture2D;
+use crate::engine::texture::TEXTURE_IDS;
 use bytemuck;
-use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
-use winit::window::Window;
-use crate::engine::actors::entity::RawEntity2D;
 use std::collections::HashMap;
 use wgpu::util::BufferInitDescriptor;
-use crate::engine::primitives::vector::Vector2;
-use crate::engine::texture::TEXTURE_IDS;
+use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
+use winit::window::Window;
 
 pub struct RenderData {
     device: wgpu::Device,
@@ -27,9 +27,10 @@ pub struct RenderData {
     textures: Texture2DMap,
     // These may be part of the texture in the future when I work out what to do with them
     bind_group_layout: wgpu::BindGroupLayout,
-    // Will need to separate walls and sprites here... possibly different Hashmaps.
-    // eg, wall_entities, sprite entities, separate loops iterating through them, with sprites coming after1
-    // K: TextureID, V: Batch of entities
+    /* TODO Will need to separate walls and sprites here... possibly different Hashmaps.
+        eg, wall_entities, sprite entities, separate loops iterating through them, with sprites coming after1
+        K: TextureID, V: Batch of entities
+     */
     entities: HashMap<u32, Vec<Entity2D>>,
     entity_buffer: wgpu::Buffer,
 }
@@ -128,20 +129,34 @@ impl RenderData {
         let mut textures = Texture2DMap::new();
         textures.add_texture(tex);
         textures.add_texture(tex_two);
-        let entity_one = Entity2D::new(tex_one_id, Vector2{x: 0, y: 0}, 0.0, 1.0, Vector2{x: 0, y: 0});
-        let entity_two = Entity2D::new(tex_one_id, Vector2{x: 0, y: 0}, 0.0, 1.0, Vector2{x: 0, y: 0});
-
+        let entity_one = Entity2D::new(
+            tex_one_id,
+            Vector2 { x: 0, y: 0 },
+            0.0,
+            1.0,
+            Vector2 { x: 0, y: 0 },
+        );
+        let entity_two = Entity2D::new(
+            tex_one_id,
+            Vector2 { x: 0, y: 0 },
+            0.0,
+            1.0,
+            Vector2 { x: 0, y: 0 },
+        );
 
         // TEMPORARY
         let entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
-        let entity_vec = entities.iter().map(|x| x.1).flatten().map(|z| z.to_raw()).collect::<Vec<RawEntity2D>>();
-        let entity_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Entity Buffer"),
-                contents: bytemuck::cast_slice(&entity_vec),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
+        let entity_vec = entities
+            .iter()
+            .map(|x| x.1)
+            .flatten()
+            .map(|z| z.to_raw())
+            .collect::<Vec<RawEntity2D>>();
+        let entity_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Entity Buffer"),
+            contents: bytemuck::cast_slice(&entity_vec),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),
@@ -263,15 +278,25 @@ impl RenderData {
             render_pass.set_pipeline(&self.pipeline);
             for batch in &self.entities {
                 // TODO: keys with empty values may be an issue, this will need to be checked for and removed when textures are removed
-                render_pass.set_bind_group(0, self.textures.inner().get(&batch.0).unwrap().bind_group(), &[]);
+                render_pass.set_bind_group(
+                    0,
+                    self.textures.inner().get(&batch.0).unwrap().bind_group(),
+                    &[],
+                );
+                // TODO: Create Vertex Buffer
+
                 let entities_vec: Vec<RawEntity2D> = batch.1.iter().map(|x| x.to_raw()).collect();
-                self.vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+                self.entity_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
                     label: Some("Entities Buffer"),
                     contents: bytemuck::cast_slice(&entities_vec),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
-                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-                render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                render_pass.set_vertex_buffer(1, self.entity_buffer.slice(..));
+                /* TODO, create index buffer that updates when new entities are added or removed, should be the
+                    same pattern of indices each time (eg 1,2,3,4).
+                 */
+                render_pass
+                    .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
                 render_pass.draw_indexed(0..self.index_count, 0, 0..1);
             }
         }

@@ -8,21 +8,21 @@ pub struct Vertex2D {
 impl Vertex2D {
     pub fn descriptor() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<Vertex2D>() as wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &[
-                        wgpu::VertexAttribute {
-                            format: wgpu::VertexFormat::Float32x2,
-                            offset: 0,
-                            shader_location: 0,
-                        },
-                        wgpu::VertexAttribute {
-                            format: wgpu::VertexFormat::Float32x2,
-                            offset: std::mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
-                            shader_location: 1,
-                        },
-                    ],
-                }
+            array_stride: std::mem::size_of::<Vertex2D>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
+                    offset: 0,
+                    shader_location: 0,
+                },
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
+                    offset: std::mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
+                    shader_location: 1,
+                },
+            ],
+        }
     }
 }
 
