@@ -10,6 +10,8 @@ pub struct RawEntity2D {
     rotation: [[f32; 2]; 2],
     scale: [[f32; 2]; 2],
     origin: [u32; 2],
+    vertex_position: [[f32; 2];4],
+    tex_pos: [[f32; 2];4],
 }
 
 impl RawEntity2D {
@@ -52,6 +54,54 @@ impl RawEntity2D {
                         as wgpu::BufferAddress,
                     shader_location: 7,
                     format: wgpu::VertexFormat::Uint32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 10]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 8,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 12]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 9,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 14]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 10,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 16]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 11,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 18]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 12,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 20]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 13,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 22]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 14,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+                wgpu::VertexAttribute {
+                    offset: (mem::size_of::<[u32; 2]>() + mem::size_of::<[f32; 24]>())
+                        as wgpu::BufferAddress,
+                    shader_location: 15,
+                    format: wgpu::VertexFormat::Float32x2,
                 },
             ],
         }
@@ -144,7 +194,17 @@ impl Entity2D {
             rotation: self.transformation.rotation(),
             scale: self.transformation.scale(),
             origin: self.origin.to_raw(),
+            vertex_position: self.vertices.map(|x| x.position),
+            tex_pos: self.vertices.map(|x| x.tex_pos),
         }
+    }
+
+    pub fn texture_id(&self) -> u32 {
+        self.tex_id
+    }
+
+    pub fn vertices(&self) -> &[Vertex2D; 4] {
+        &self.vertices
     }
 }
 

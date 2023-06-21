@@ -1,17 +1,17 @@
 [package]
-name = "learn-wgpu"
+name = "strifve-caster"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.27"
+winit = "0.28"
 env_logger = "0.10"
 log = "0.4"
-wgpu = "0.15"
+wgpu = "0.16"
 cfg-if = "1"
-pollster = "0.2"
+pollster = "0.3"
 bytemuck = { version = "1.13", features = [ "derive" ]}
 anyhow = "1.0.71"
 num-traits = "0.2.15"

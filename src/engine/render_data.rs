@@ -9,6 +9,9 @@ use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelin
 use winit::window::Window;
 use crate::engine::actors::entity::RawEntity2D;
 use std::collections::HashMap;
+use wgpu::util::BufferInitDescriptor;
+use crate::engine::primitives::vector::Vector2;
+use crate::engine::texture::TEXTURE_IDS;
 
 pub struct RenderData {
     device: wgpu::Device,
@@ -113,6 +116,7 @@ impl RenderData {
         let tex =
             texture::Texture2D::new("src/assets/yharon.png", &queue, &device, &bind_group_layout)
                 .unwrap();
+        let tex_one_id = tex.id();
         let tex_two = texture::Texture2D::new(
             "src/assets/calamitas.png",
             &queue,
@@ -120,9 +124,12 @@ impl RenderData {
             &bind_group_layout,
         )
         .unwrap();
+        let tex_two_id = tex_two.id();
         let mut textures = Texture2DMap::new();
         textures.add_texture(tex);
         textures.add_texture(tex_two);
+        let entity_one = Entity2D::new(tex_one_id, Vector2{x: 0, y: 0}, 0.0, 1.0, Vector2{x: 0, y: 0});
+        let entity_two = Entity2D::new(tex_one_id, Vector2{x: 0, y: 0}, 0.0, 1.0, Vector2{x: 0, y: 0});
 
 
         // TEMPORARY
@@ -228,7 +235,7 @@ impl RenderData {
         }
     }
 
-    pub fn render(&self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let frame = self.surface.get_current_texture()?;
         let view = frame
             .texture
@@ -253,24 +260,19 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
 
-            let mut iter_pos = 0;
-            for tex in self.textures.inner() {
-                println!("{}", tex.0);
-                render_pass.set_pipeline(&self.pipeline);
-                render_pass.set_bind_group(0, tex.1.bind_group(), &[]);
-
+            render_pass.set_pipeline(&self.pipeline);
+            for batch in &self.entities {
+                // TODO: keys with empty values may be an issue, this will need to be checked for and removed when textures are removed
+                render_pass.set_bind_group(0, self.textures.inner().get(&batch.0).unwrap().bind_group(), &[]);
+                let entities_vec: Vec<RawEntity2D> = batch.1.iter().map(|x| x.to_raw()).collect();
+                self.vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+                    label: Some("Entities Buffer"),
+                    contents: bytemuck::cast_slice(&entities_vec),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
                 render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-                render_pass
-                    .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                // render_pass.draw_indexed(0..self.index_count, 0, 0..1);
-                if iter_pos == 0 {
-                    render_pass.draw_indexed(0..self.index_count, 0, 0..1);
-                    iter_pos += 1;
-                    continue;
-                }
-
-                render_pass.draw_indexed(0..3, 0, 0..1);
-                iter_pos += 1;
+                render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                render_pass.draw_indexed(0..self.index_count, 0, 0..1);
             }
         }
         self.queue.submit(Some(encoder.finish()));
