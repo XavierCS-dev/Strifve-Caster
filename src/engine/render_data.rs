@@ -1,3 +1,4 @@
+use std::cell::{Cell, RefCell};
 use super::actors::entity::Entity2D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
@@ -251,7 +252,7 @@ impl RenderData {
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let frame = self.surface.get_current_texture()?;
+        let frame = self.surface.get_current_texture()?;use core::borrow;
         let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -274,7 +275,6 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
-
             render_pass.set_pipeline(&self.pipeline);
             for batch in &self.entities {
                 // TODO: keys with empty values may be an issue, this will need to be checked for and removed when textures are removed
@@ -285,25 +285,27 @@ impl RenderData {
                 );
                 // TODO: Create Vertex Buffer
                 let mut vertex_vec: Vec<Vertex2D> = Vec::new();
+                // time complexity is O(n)
                 for entity_2d in batch.1 {
                     for vertex in entity_2d.vertices() {
                         vertex_vec.push(*vertex);
                     }
                 }
-                self.vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+                let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
                     label: Some("Vertex Buffer"),
                     contents: bytemuck::cast_slice(&vertex_vec),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
-                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+                render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+
 
                 let entities_vec: Vec<RawEntity2D> = batch.1.iter().map(|x| x.to_raw()).collect();
-                self.entity_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+                let entity_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
                     label: Some("Entities Buffer"),
                     contents: bytemuck::cast_slice(&entities_vec),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
-                render_pass.set_vertex_buffer(1, self.entity_buffer.slice(..));
+                render_pass.set_vertex_buffer(1, entity_buffer.slice(..));
                 /* TODO, create index buffer that updates when new entities are added or removed, should be the
                     same pattern of indices each time (eg 1,2,3,4).
                  */

@@ -66,8 +66,9 @@ impl Texture2D {
             &rgba_buffer,
             wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: std::num::NonZeroU32::new(4 * dimensions.0),
-                rows_per_image: std::num::NonZeroU32::new(dimensions.1),
+                // TODO: Using std::num::NonZeroU32 has seem to broke..use regular U32 for now...
+                bytes_per_row: Some(4 * texture_dimensions.width),
+                rows_per_image: Some(texture_dimensions.height),
             },
             texture_dimensions,
         );
