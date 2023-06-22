@@ -1,21 +1,30 @@
-use wgpu::util::DeviceExt;
 use crate::engine::actors::entity::{Entity2D, RawEntity2D};
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::texture::Texture2D;
+use wgpu::util::DeviceExt;
 
 pub struct Batch2D {
     id: u32,
     entity_data: Vec<RawEntity2D>,
     vertex_data: Vec<Vertex2D>,
+    indices: Vec<u16>,
     texture: Texture2D,
     entity_buffer: Option<wgpu::Buffer>,
     vertex_buffer: Option<wgpu::Buffer>,
+    index_buffer: Option<wgpu::Buffer>,
 }
 
 impl Batch2D {
-    pub fn new(texture_path: &str, queue: &wgpu::Queue, device: &wgpu::Device, bind_group_layout: &wgpu::BindGroupLayout) -> Self {
+    pub fn new(
+        texture_path: &str,
+        queue: &wgpu::Queue,
+        device: &wgpu::Device,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Self {
         let texture = Texture2D::new(texture_path, queue, device, bind_group_layout);
         let entity_data = Vec::new();
+        let vertex_dara = Vec::new();
+        let indices = Vec::new();
         let entity_buffer = None;
         let vertex_buffer = None;
 
@@ -29,24 +38,22 @@ impl Batch2D {
                 self.vertex_data.push(*vertex);
             }
         }
-        self.entity_buffer = Some (
-            device.create_buffer_init(
-                &wgpu::util::BufferInitDescriptor {
-                    label: Some("Entity Buffer"),
-                    contents: bytemuck::cast_slice(&self.entity_data),
-                    usage: wgpu::BufferUsages::VERTEX,
-                }
-            )
+        self.entity_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Entity Buffer"),
+                contents: bytemuck::cast_slice(&self.entity_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
         );
-        self.vertex_buffer = Some (
-            device.create_buffer_init(
-                &wgpu::util::BufferInitDescriptor {
-                    label: Some("Entity Buffer"),
-                    contents: bytemuck::cast_slice(&self.vertex_data),
-                    usage: wgpu::BufferUsages::VERTEX,
-                }
-            )
+        self.vertex_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Entity Buffer"),
+                contents: bytemuck::cast_slice(&self.vertex_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
         );
+        // TODO: Implement vertex buffer creation, should be adding same 6 vertices repeated n number of times where n is the number of entities
+        todo!();
     }
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
