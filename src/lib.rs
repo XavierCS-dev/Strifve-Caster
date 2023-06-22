@@ -14,7 +14,7 @@ pub async fn run() {
         .build(&event_loop)
         .unwrap();
     window.set_resizable(false);
-    let render_data = RenderData::new(window).await;
+    let mut render_data = RenderData::new(window).await;
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
         match event {

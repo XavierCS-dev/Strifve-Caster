@@ -86,20 +86,20 @@ impl Entity2D {
         }
         let vertices = [
             Vertex2D {
-                position: [0.0, 0.0],
-                tex_pos: [0.0, 0.0],
+                position: [1.0, 0.0],
+                tex_pos: [1.0, 0.0],
             },
             Vertex2D {
-                position: [0.0, 0.0],
-                tex_pos: [0.0, 0.0],
+                position: [-1.0, 0.0],
+                tex_pos: [-1.0, 0.0],
             },
             Vertex2D {
-                position: [0.0, 0.0],
-                tex_pos: [0.0, 0.0],
+                position: [-1.0, 0.0],
+                tex_pos: [-1.0, 0.0],
             },
             Vertex2D {
-                position: [0.0, 0.0],
-                tex_pos: [0.0, 0.0],
+                position: [-1.0, 0.0],
+                tex_pos: [1.0, 0.0],
             },
         ];
         Self {

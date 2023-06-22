@@ -284,6 +284,18 @@ impl RenderData {
                     &[],
                 );
                 // TODO: Create Vertex Buffer
+                let mut vertex_vec: Vec<Vertex2D> = Vec::new();
+                for entity_2d in batch.1 {
+                    for vertex in entity_2d.vertices() {
+                        vertex_vec.push(*vertex);
+                    }
+                }
+                self.vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+                    label: Some("Vertex Buffer"),
+                    contents: bytemuck::cast_slice(&vertex_vec),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
+                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
                 let entities_vec: Vec<RawEntity2D> = batch.1.iter().map(|x| x.to_raw()).collect();
                 self.entity_buffer = self.device.create_buffer_init(&BufferInitDescriptor {

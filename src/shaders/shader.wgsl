@@ -24,6 +24,7 @@ fn vs_main(
     model: VertexInput,
     entity: EntityInput,
 ) -> VertexOutput {
+// TODO: do entity calculations on vertex
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
     out.clip_position = vec4<f32>(model.position, 0.0, 1.0);
