@@ -22,18 +22,7 @@ pub struct RenderData {
     surface: wgpu::Surface,
     window: Window,
     pipeline: wgpu::RenderPipeline,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
     index_count: u32,
-    textures: Texture2DMap,
-    // These may be part of the texture in the future when I work out what to do with them
-    bind_group_layout: wgpu::BindGroupLayout,
-    /* TODO Will need to separate walls and sprites here... possibly different Hashmaps.
-        eg, wall_entities, sprite entities, separate loops iterating through them, with sprites coming after1
-        K: TextureID, V: Batch of entities
-     */
-    entities: HashMap<u32, Vec<Entity2D>>,
-    entity_buffer: wgpu::Buffer,
 }
 
 // Temp, to be removed
@@ -276,42 +265,7 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
             render_pass.set_pipeline(&self.pipeline);
-            for batch in &self.entities {
-                // TODO: keys with empty values may be an issue, this will need to be checked for and removed when textures are removed
-                render_pass.set_bind_group(
-                    0,
-                    self.textures.inner().get(&batch.0).unwrap().bind_group(),
-                    &[],
-                );
-                // TODO: Create Vertex Buffer
-                let mut vertex_vec: Vec<Vertex2D> = Vec::new();
-                // time complexity is O(n)
-                for entity_2d in batch.1 {
-                    for vertex in entity_2d.vertices() {
-                        vertex_vec.push(*vertex);
-                    }
-                }
-                let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
-                    label: Some("Vertex Buffer"),
-                    contents: bytemuck::cast_slice(&vertex_vec),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
-                render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-
-
-                let entities_vec: Vec<RawEntity2D> = batch.1.iter().map(|x| x.to_raw()).collect();
-                let entity_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
-                    label: Some("Entities Buffer"),
-                    contents: bytemuck::cast_slice(&entities_vec),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
-                render_pass.set_vertex_buffer(1, entity_buffer.slice(..));
-                /* TODO, create index buffer that updates when new entities are added or removed, should be the
-                    same pattern of indices each time (eg 1,2,3,4).
-                 */
-                render_pass
-                    .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+            // TODO: Implement rendering using Batch2D
             }
         }
         self.queue.submit(Some(encoder.finish()));
