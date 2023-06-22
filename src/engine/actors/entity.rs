@@ -3,6 +3,10 @@ use crate::engine::primitives::{transformation::Transformation2D, vector::Vector
 use crate::engine::texture::TEXTURE_IDS;
 use crate::engine::traits::update_entity::UpdateEntity;
 
+
+// TODO: CREATE IDs FOR ENTITIES AND REMOVE TEXTURE ID SYSTEM
+
+
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct RawEntity2D {

@@ -6,8 +6,11 @@ use std::{collections::HashSet, fs::File, io, io::BufReader, io::Read, sync::Mut
 
 use image::GenericImageView;
 
+// TODO: REMOVE TEXTURE ID SYSTEM AND MOVE TO BATCH
+
 /// Contains a list of texture IDs. Only intended to be used by advanced users.
 pub static mut TEXTURE_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
 
 #[derive(Debug)]
 pub struct Texture2D {
