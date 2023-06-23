@@ -112,6 +112,11 @@ impl Batch2D {
         drop(batch_ids);
         num
     }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
 }
 
 impl Drop for Batch2D {
