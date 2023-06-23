@@ -113,8 +113,6 @@ impl RenderData {
             &device,
             &bind_group_layout,
         );
-
-        // TODO: Supply IDs for test batches
         let entity_one = Entity2D::new(
             batch_one.id(),
             Vector2 { x: 0, y: 0 },
@@ -123,7 +121,7 @@ impl RenderData {
             Vector2 { x: 0, y: 0 },
         );
         let entity_two = Entity2D::new(
-            tex_one_id,
+            batch_two.id(),
             Vector2 { x: 0, y: 0 },
             0.0,
             1.0,
@@ -132,17 +130,7 @@ impl RenderData {
 
         // TEMPORARY
         let entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
-        let entity_vec = entities
-            .iter()
-            .map(|x| x.1)
-            .flatten()
-            .map(|z| z.to_raw())
-            .collect::<Vec<RawEntity2D>>();
-        let entity_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Entity Buffer"),
-            contents: bytemuck::cast_slice(&entity_vec),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),
