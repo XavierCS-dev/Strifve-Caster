@@ -1,6 +1,8 @@
 use crate::engine::actors::entity::{Entity2D, RawEntity2D};
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::texture::Texture2D;
+use rand::Rng;
+use std::sync::Mutex;
 use wgpu::util::DeviceExt;
 
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
@@ -13,6 +15,8 @@ use wgpu::util::DeviceExt;
 // of Batches.
 // However if a batch doesn't update, the buffer won't need to be reallocated. In the case of this engine,
 // this will be very rare due to the nature of raycasters, and may only apply to sprites.
+
+pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 pub struct Batch2D {
     id: u32,
@@ -32,14 +36,26 @@ impl Batch2D {
         device: &wgpu::Device,
         bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Self {
-        let texture = Texture2D::new(texture_path, queue, device, bind_group_layout);
+        let id = unsafe { Batch2D::create_id() };
+        let texture = Texture2D::new(texture_path, queue, device, bind_group_layout)
+            .expect(format!("Could not find image {}", texture_path).as_str());
         let entity_data = Vec::new();
-        let vertex_dara = Vec::new();
+        let vertex_data = Vec::new();
         let indices = Vec::new();
         let entity_buffer = None;
         let vertex_buffer = None;
+        let index_buffer = None;
 
-        // TODO: Implement ID Creation
+        Self {
+            id,
+            entity_data,
+            vertex_data,
+            indices,
+            texture,
+            entity_buffer,
+            vertex_buffer,
+            index_buffer,
+        }
     }
 
     pub fn update(&mut self, entities: Vec<&Entity2D>, device: &wgpu::Device) {
@@ -83,6 +99,27 @@ impl Batch2D {
         match &self.entity_buffer {
             Some(b) => Some(&b),
             _ => None,
+        }
+    }
+
+    unsafe fn create_id() -> u32 {
+        let mut num = rand::thread_rng().gen_range(0..u32::MAX);
+        let mut batch_ids = BATCH_IDS.lock().unwrap();
+        while batch_ids.contains(&num) {
+            num = rand::thread_rng().gen_range(0..u32::MAX);
+        }
+        batch_ids.push(num);
+        drop(batch_ids);
+        num
+    }
+}
+
+impl Drop for Batch2D {
+    fn drop(&mut self) {
+        unsafe {
+            let mut batch_ids = BATCH_IDS.lock().unwrap();
+            batch_ids.remove(batch_ids.binary_search(&self.id).unwrap());
+            drop(batch_ids);
         }
     }
 }
