@@ -6,14 +6,8 @@ use std::{collections::HashSet, fs::File, io, io::BufReader, io::Read, sync::Mut
 
 use image::GenericImageView;
 
-// TODO: REMOVE TEXTURE ID SYSTEM AND MOVE TO BATCH
-
-/// Contains a list of texture IDs. Only intended to be used by advanced users.
-pub static mut TEXTURE_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
-
 #[derive(Debug)]
 pub struct Texture2D {
-    id: u32,
     diffuse_texture: wgpu::Texture,
     sampler: wgpu::Sampler,
     view: wgpu::TextureView,
@@ -136,19 +130,4 @@ impl Texture2D {
         self.dimensions
     }
 
-    pub fn id(&self) -> u32 {
-        self.id
-    }
-
-    /// Creates and adds and ID to TextureIDs. Can cause TextureIDs to leak IDs.
-    unsafe fn create_id() -> u32 {
-        let mut num = rand::thread_rng().gen_range(0..std::u32::MAX);
-        let mut tex_ids = TEXTURE_IDS.lock().unwrap();
-        while tex_ids.contains(&num) {
-            num = rand::thread_rng().gen_range(0..std::u32::MAX);
-        }
-        tex_ids.push(num);
-        drop(tex_ids);
-        num
-    }
 }
