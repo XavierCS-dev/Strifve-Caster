@@ -1,7 +1,7 @@
-use std::cell::{Cell, RefCell};
 use super::actors::entity::Entity2D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
+use crate::engine::advanced_types::batch::Batch2D;
 use crate::engine::advanced_types::texture_vecs::Texture2DMap;
 use crate::engine::primitives::vector::Vector2;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
@@ -9,8 +9,10 @@ use crate::engine::texture;
 use crate::engine::texture::Texture2D;
 use crate::engine::texture::TEXTURE_IDS;
 use bytemuck;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use wgpu::util::BufferInitDescriptor;
+use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
 use winit::window::Window;
 
@@ -104,23 +106,17 @@ impl RenderData {
                 },
             ],
         });
-        let tex =
-            texture::Texture2D::new("src/assets/yharon.png", &queue, &device, &bind_group_layout)
-                .unwrap();
-        let tex_one_id = tex.id();
-        let tex_two = texture::Texture2D::new(
+        let batch_one = Batch2D::new("src/assets/yharon.png", &queue, &device, &bind_group_layout);
+        let batch_two = Batch2D::new(
             "src/assets/calamitas.png",
             &queue,
             &device,
             &bind_group_layout,
-        )
-        .unwrap();
-        let tex_two_id = tex_two.id();
-        let mut textures = Texture2DMap::new();
-        textures.add_texture(tex);
-        textures.add_texture(tex_two);
+        );
+
+        // TODO: Supply IDs for test batches
         let entity_one = Entity2D::new(
-            tex_one_id,
+            batch_one.id(),
             Vector2 { x: 0, y: 0 },
             0.0,
             1.0,
@@ -241,7 +237,8 @@ impl RenderData {
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let frame = self.surface.get_current_texture()?;use core::borrow;
+        let frame = self.surface.get_current_texture()?;
+        use core::borrow;
         let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -266,7 +263,6 @@ impl RenderData {
             });
             render_pass.set_pipeline(&self.pipeline);
             // TODO: Implement rendering using Batch2D
-            }
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();

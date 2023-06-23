@@ -3,7 +3,6 @@ use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::texture::Texture2D;
 use wgpu::util::DeviceExt;
 
-
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
 // This allows an easily modifiable group of entities with the same texture to be drawn together.
 // Having a Batch struct allows the use of separate buffers for each batch, without having to fight
@@ -64,6 +63,7 @@ impl Batch2D {
                 usage: wgpu::BufferUsages::VERTEX,
             }),
         );
+        // TODO: Implement index vec and buffer creation, index buffer / vec should only be updated if no# of entities changes
         // TODO: Implement vertex buffer creation, should be adding same 6 vertices repeated n number of times where n is the number of entities
         todo!();
     }

@@ -11,7 +11,6 @@ use image::GenericImageView;
 /// Contains a list of texture IDs. Only intended to be used by advanced users.
 pub static mut TEXTURE_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
-
 #[derive(Debug)]
 pub struct Texture2D {
     id: u32,
