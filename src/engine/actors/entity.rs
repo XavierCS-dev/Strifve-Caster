@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+use rand::Rng;
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
 use crate::engine::texture::TEXTURE_IDS;
@@ -60,7 +62,10 @@ impl RawEntity2D {
     }
 }
 
+pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
 pub struct Entity2D {
+    id: u32,
     position: Vector2<u32>,
     rotation: f32,
     scale: f32,
@@ -155,6 +160,27 @@ impl Entity2D {
 
     pub fn vertices(&self) -> &[Vertex2D; 4] {
         &self.vertices
+    }
+
+    unsafe fn create_id() -> u32 {
+        let mut num = rand::thread_rng().gen_range(0..u32::MAX);
+        let mut entity_ids = ENTITY_IDS.lock().unwrap();
+        while entity_ids.contains(&num) {
+            num = rand::thread_rng().gen_range(0..u32::MAX);
+        }
+        entity_ids.push(num);
+        drop(entity_ids);
+        num
+    }
+}
+
+impl Drop for Entity2D {
+    fn drop(&mut self) {
+        unsafe {
+            let mut entity_ids = ENTITY_IDS.lock().unwrap();
+            entity_ids.remove(entity_ids.binary_search(&self.id).unwrap());
+            drop(entity_ids);
+        }
     }
 }
 
