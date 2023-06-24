@@ -83,14 +83,8 @@ impl Entity2D {
         scale: f32,
         origin: Vector2<u32>,
     ) -> Self {
-        // Need to check the TextureMap instead.... may need to introduce RW lock to it or something...but that will come later when adding threaded code
-        unsafe {
-            let tex_ids = TEXTURE_IDS.lock().unwrap();
-            if !tex_ids.contains(&tex_id) {
-                panic!("Invalid texture id: {}", tex_id);
-            }
-            drop(tex_ids);
-        }
+
+        let id = unsafe {Entity2D::create_id()};
         let vertices = [
             Vertex2D {
                 position: [1.0, 0.0],
@@ -110,6 +104,7 @@ impl Entity2D {
             },
         ];
         Self {
+            id,
             position,
             rotation,
             scale,
