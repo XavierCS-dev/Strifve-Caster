@@ -3,6 +3,7 @@ use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::texture::Texture2D;
 use rand::Rng;
 use std::sync::Mutex;
+use num_traits::abs;
 use wgpu::util::DeviceExt;
 
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
@@ -18,6 +19,8 @@ use wgpu::util::DeviceExt;
 
 pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
+
+
 pub struct Batch2D {
     id: u32,
     entity_data: Vec<RawEntity2D>,
@@ -25,6 +28,7 @@ pub struct Batch2D {
     indices: Vec<u16>,
     texture: Texture2D,
     entity_buffer: Option<wgpu::Buffer>,
+    entity_count: usize,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
 }
@@ -43,6 +47,7 @@ impl Batch2D {
         let vertex_data = Vec::new();
         let indices = Vec::new();
         let entity_buffer = None;
+        let entity_count: usize = 0;
         let vertex_buffer = None;
         let index_buffer = None;
 
@@ -53,12 +58,17 @@ impl Batch2D {
             indices,
             texture,
             entity_buffer,
+            entity_count,
             vertex_buffer,
             index_buffer,
         }
     }
 
-    pub fn update(&mut self, entities: Vec<&Entity2D>, device: &wgpu::Device) {
+    pub fn update(&mut self, entities: &Vec<Entity2D>, device: &wgpu::Device) {
+        let mut recreate_index = false;
+        if entities.len() != self.entity_count {
+            recreate_index = true;
+        }
         for entity in entities {
             self.entity_data.push(entity.to_raw());
             for vertex in entity.vertices() {
@@ -74,14 +84,41 @@ impl Batch2D {
         );
         self.vertex_buffer = Some(
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Entity Buffer"),
+                label: Some("Vertex Buffer"),
                 contents: bytemuck::cast_slice(&self.vertex_data),
                 usage: wgpu::BufferUsages::VERTEX,
             }),
         );
-        // TODO: Implement index vec and buffer creation, index buffer / vec should only be updated if no# of entities changes
-        // TODO: Implement vertex buffer creation, should be adding same 6 vertices repeated n number of times where n is the number of entities
-        todo!();
+        if recreate_index {
+            self.index_buffer = Some(device.create_buffer_init(
+                &wgpu::util::BufferInitDescriptor {
+                    label: Some("Index Buffer"),
+                    contents: bytemuck::cast_slice(&self.indices),
+                    usage: wgpu::BufferUsages::VERTEX,
+                },
+            ));
+            let mut difference = self.entity_count as i32 - entities.len() as i32;
+            if difference < 0 {
+                difference = abs(difference);
+                for _ in 0..difference {
+                    for _ in 0..6 {
+                        self.indices.pop().expect("Tried to pop more entities off batch then exists");
+                    }
+                }
+            } else if difference > 0 {
+                for _ in 0..difference {
+                    self.indices.push(0);
+                    self.indices.push(1);
+                    self.indices.push(2);
+                    self.indices.push(0);
+                    self.indices.push(2);
+                    self.indices.push(3);
+                }
+            } else {
+                panic!("number of entities didn't change but still entered update index");
+            }
+            self.entity_count = entities.len();
+        }
     }
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
@@ -116,7 +153,6 @@ impl Batch2D {
     pub fn id(&self) -> u32 {
         self.id
     }
-
 }
 
 impl Drop for Batch2D {
