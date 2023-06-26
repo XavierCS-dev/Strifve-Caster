@@ -26,7 +26,7 @@ pub struct RenderData {
     window: Window,
     pipeline: wgpu::RenderPipeline,
     wall_batches: Vec<Batch2D>,
-    entities: HashMap<u32, Entity2D>,
+    walls: HashMap<u32, Entity2D>,
     index_count: u32,
 }
 
@@ -132,9 +132,9 @@ impl RenderData {
         );
 
         // TEMPORARY
-        let mut entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
-        entities.insert(entity_one.texture_id(), vec![entity_one]);
-        entities.insert(entity_two.texture_id(), vec![entity_two]);
+        let mut walls: HashMap<u32, Vec<Entity2D>> = HashMap::new();
+        walls.insert(entity_one.texture_id(), vec![entity_one]);
+        walls.insert(entity_two.texture_id(), vec![entity_two]);
         let wall_batches: Vec<Batch2D> = Vec::new();
 
 
