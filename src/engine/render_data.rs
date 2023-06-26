@@ -26,8 +26,7 @@ pub struct RenderData {
     window: Window,
     pipeline: wgpu::RenderPipeline,
     wall_batches: Vec<Batch2D>,
-    walls: HashMap<u32, Entity2D>,
-    index_count: u32,
+    walls: HashMap<u32, Vec<Entity2D>>,
 }
 
 // Temp, to be removed
@@ -220,13 +219,7 @@ impl RenderData {
             surface,
             window,
             pipeline,
-            vertex_buffer,
-            index_buffer,
-            index_count,
-            textures,
-            bind_group_layout,
-            entities,
-            entity_buffer,
+            walls,
         }
     }
 
