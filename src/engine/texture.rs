@@ -1,4 +1,4 @@
-use crate::engine::advanced_types::texture_vecs::Texture2DMap;
+
 use crate::engine::primitives::vertex::Vertex2D;
 use anyhow::Result;
 use rand::Rng;
@@ -23,8 +23,6 @@ impl Texture2D {
         device: &wgpu::Device,
         bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Self> {
-        // POSSIBLY CHANGE CREATING TEXTURE TO CREATE A TEXTURE AND ADD IT TO THE HASHMAP, RETURN ID INSTEAD OF SELF
-        let id = unsafe { Texture2D::create_id() };
         let mut byte_vec: Vec<u8> = Vec::new();
         let file = File::open(file_path)?;
         let mut buf_reader = BufReader::new(file);
@@ -96,7 +94,6 @@ impl Texture2D {
             ],
         });
         Ok(Self {
-            id,
             diffuse_texture,
             sampler: texture_sampler,
             view: texture_view,

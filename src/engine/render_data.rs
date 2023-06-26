@@ -2,7 +2,6 @@ use super::actors::entity::Entity2D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
-use crate::engine::advanced_types::texture_vecs::Texture2DMap;
 use crate::engine::primitives::vector::Vector2;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
@@ -103,7 +102,6 @@ impl RenderData {
             Vector2 { x: 0, y: 0 },
         );
 
-        // TEMPORARY
         let mut walls: HashMap<u32, Vec<Entity2D>> = HashMap::new();
         walls.insert(entity_one.texture_id(), vec![entity_one]);
         walls.insert(entity_two.texture_id(), vec![entity_two]);
@@ -208,7 +206,15 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
             render_pass.set_pipeline(&self.pipeline);
-            // TODO: Implement rendering using Batch2D
+            // THis won't work until the shader is fixed
+            for batch in &mut self.wall_batches {
+                batch.update(self.walls.get(&batch.id()).unwrap(), &self.device);
+                render_pass.set_bind_group(0, batch.bind_group(), &[]);
+                render_pass.set_vertex_buffer(0, batch.vertex_buffer().unwrap().slice(..));
+                render_pass.set_vertex_buffer(1, batch.entity_buffer().unwrap().slice(..));
+                render_pass.set_index_buffer(batch.index_buffer().unwrap().slice(..), wgpu::IndexFormat::Uint16);
+                render_pass.draw_indexed(0..(batch.entity_count() * 6), 0, 0..batch.entity_count())
+            }
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();

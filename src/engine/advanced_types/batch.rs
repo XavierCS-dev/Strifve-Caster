@@ -139,6 +139,17 @@ impl Batch2D {
         }
     }
 
+    pub fn index_buffer(&self) -> Option<&wgpu::Buffer> {
+        match &self.index_buffer {
+            Some(b) => Some(&b),
+            _ => None,
+        }
+    }
+
+    pub fn entity_count(&self) -> u32 {
+        self.entity_count as u32
+    }
+
     unsafe fn create_id() -> u32 {
         let mut num = rand::thread_rng().gen_range(0..u32::MAX);
         let mut batch_ids = BATCH_IDS.lock().unwrap();

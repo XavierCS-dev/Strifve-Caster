@@ -1,6 +1,5 @@
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
-use crate::engine::texture::TEXTURE_IDS;
 use crate::engine::traits::update_entity::UpdateEntity;
 use rand::Rng;
 use std::sync::Mutex;
