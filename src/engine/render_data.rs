@@ -11,6 +11,7 @@ use crate::engine::texture::TEXTURE_IDS;
 use bytemuck;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
+use image::error::EncodingError;
 use wgpu::util::BufferInitDescriptor;
 use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
@@ -24,6 +25,8 @@ pub struct RenderData {
     surface: wgpu::Surface,
     window: Window,
     pipeline: wgpu::RenderPipeline,
+    wall_batches: Vec<Batch2D>,
+    entities: HashMap<u32, Entity2D>,
     index_count: u32,
 }
 
@@ -129,7 +132,10 @@ impl RenderData {
         );
 
         // TEMPORARY
-        let entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
+        let mut entities: HashMap<u32, Vec<Entity2D>> = HashMap::new();
+        entities.insert(entity_one.texture_id(), vec![entity_one]);
+        entities.insert(entity_two.texture_id(), vec![entity_two]);
+        let wall_batches: Vec<Batch2D> = Vec::new();
 
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {

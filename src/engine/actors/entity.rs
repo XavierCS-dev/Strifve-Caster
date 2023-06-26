@@ -167,6 +167,10 @@ impl Entity2D {
         drop(entity_ids);
         num
     }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
 }
 
 impl Drop for Entity2D {
