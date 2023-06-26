@@ -1,9 +1,9 @@
 use crate::engine::actors::entity::{Entity2D, RawEntity2D};
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::texture::Texture2D;
+use num_traits::abs;
 use rand::Rng;
 use std::sync::Mutex;
-use num_traits::abs;
 use wgpu::util::DeviceExt;
 
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
@@ -18,8 +18,6 @@ use wgpu::util::DeviceExt;
 // this will be very rare due to the nature of raycasters, and may only apply to sprites.
 
 pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
-
-
 
 pub struct Batch2D {
     id: u32,
@@ -102,7 +100,9 @@ impl Batch2D {
                 difference = abs(difference);
                 for _ in 0..difference {
                     for _ in 0..6 {
-                        self.indices.pop().expect("Tried to pop more entities off batch then exists");
+                        self.indices
+                            .pop()
+                            .expect("Tried to pop more entities off batch then exists");
                     }
                 }
             } else if difference > 0 {

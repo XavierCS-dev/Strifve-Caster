@@ -7,11 +7,10 @@ use crate::engine::primitives::vector::Vector2;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
 use crate::engine::texture::Texture2D;
-use crate::engine::texture::TEXTURE_IDS;
 use bytemuck;
+use image::error::EncodingError;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-use image::error::EncodingError;
 use wgpu::util::BufferInitDescriptor;
 use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
@@ -135,7 +134,6 @@ impl RenderData {
         walls.insert(entity_one.texture_id(), vec![entity_one]);
         walls.insert(entity_two.texture_id(), vec![entity_two]);
         let wall_batches: Vec<Batch2D> = Vec::new();
-
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),

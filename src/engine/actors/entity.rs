@@ -1,9 +1,9 @@
-use std::sync::Mutex;
-use rand::Rng;
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
 use crate::engine::texture::TEXTURE_IDS;
 use crate::engine::traits::update_entity::UpdateEntity;
+use rand::Rng;
+use std::sync::Mutex;
 
 // TODO: CREATE IDs FOR ENTITIES AND REMOVE TEXTURE ID SYSTEM
 
@@ -83,8 +83,7 @@ impl Entity2D {
         scale: f32,
         origin: Vector2<u32>,
     ) -> Self {
-
-        let id = unsafe {Entity2D::create_id()};
+        let id = unsafe { Entity2D::create_id() };
         let vertices = [
             Vertex2D {
                 position: [1.0, 0.0],

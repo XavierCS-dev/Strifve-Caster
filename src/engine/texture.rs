@@ -129,5 +129,4 @@ impl Texture2D {
     pub fn dimensions(&self) -> wgpu::Extent3d {
         self.dimensions
     }
-
 }
