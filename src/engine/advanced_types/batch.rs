@@ -66,7 +66,6 @@ impl Batch2D {
     }
 
     pub fn update(&mut self, entities: &Vec<Entity2D>, device: &wgpu::Device) {
-
         let mut recreate_index = false;
         if entities.len() != self.entity_count {
             recreate_index = true;

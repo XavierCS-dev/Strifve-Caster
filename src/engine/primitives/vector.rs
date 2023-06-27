@@ -17,3 +17,23 @@ where
         [self.x, self.y]
     }
 }
+
+pub struct Vector3<T>
+where
+    T: num_traits::Num,
+    T: Copy,
+{
+    pub x: T,
+    pub y: T,
+    pub z: T,
+}
+
+impl<T> Vector3<T>
+where
+    T: num_traits::Num,
+    T: Copy,
+{
+    pub fn to_raw(&self) -> [T; 3] {
+        [self.x, self.y, self.z]
+    }
+}

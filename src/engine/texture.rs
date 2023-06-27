@@ -1,4 +1,3 @@
-
 use crate::engine::primitives::vertex::Vertex2D;
 use anyhow::Result;
 use rand::Rng;

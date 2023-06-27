@@ -212,7 +212,10 @@ impl RenderData {
                 render_pass.set_bind_group(0, batch.bind_group(), &[]);
                 render_pass.set_vertex_buffer(0, batch.vertex_buffer().unwrap().slice(..));
                 render_pass.set_vertex_buffer(1, batch.entity_buffer().unwrap().slice(..));
-                render_pass.set_index_buffer(batch.index_buffer().unwrap().slice(..), wgpu::IndexFormat::Uint16);
+                render_pass.set_index_buffer(
+                    batch.index_buffer().unwrap().slice(..),
+                    wgpu::IndexFormat::Uint16,
+                );
                 render_pass.draw_indexed(0..(batch.entity_count() * 6), 0, 0..batch.entity_count())
             }
         }
