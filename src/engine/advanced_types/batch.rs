@@ -29,6 +29,8 @@ pub struct Batch2D {
     entity_count: usize,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
+    // TEMP
+    updated: bool,
 }
 
 impl Batch2D {
@@ -59,10 +61,12 @@ impl Batch2D {
             entity_count,
             vertex_buffer,
             index_buffer,
+            updated: false,
         }
     }
 
     pub fn update(&mut self, entities: &Vec<Entity2D>, device: &wgpu::Device) {
+
         let mut recreate_index = false;
         if entities.len() != self.entity_count {
             recreate_index = true;
@@ -73,6 +77,13 @@ impl Batch2D {
                 self.vertex_data.push(*vertex);
             }
         }
+        //TEMP
+        if self.updated {
+            return;
+        }
+        self.updated = true;
+        //TEMP
+
         self.entity_buffer = Some(
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Entity Buffer"),
