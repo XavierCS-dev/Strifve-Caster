@@ -88,21 +88,15 @@ impl Batch2D {
             }),
         );
         if recreate_index {
-            self.index_buffer = Some(device.create_buffer_init(
-                &wgpu::util::BufferInitDescriptor {
-                    label: Some("Index Buffer"),
-                    contents: bytemuck::cast_slice(&self.indices),
-                    usage: wgpu::BufferUsages::VERTEX,
-                },
-            ));
-            let mut difference = self.entity_count as i32 - entities.len() as i32;
+            let mut difference = entities.len() as i32 - self.entity_count as i32;
+            self.entity_count += difference as usize;
             if difference < 0 {
                 difference = abs(difference);
                 for _ in 0..difference {
                     for _ in 0..6 {
                         self.indices
                             .pop()
-                            .expect("Tried to pop more entities off batch then exists");
+                            .expect("Tried to pop more entities off batch than exists");
                     }
                 }
             } else if difference > 0 {
@@ -117,6 +111,13 @@ impl Batch2D {
             } else {
                 panic!("number of entities didn't change but still entered update index");
             }
+            self.index_buffer = Some(device.create_buffer_init(
+                &wgpu::util::BufferInitDescriptor {
+                    label: Some("Index Buffer"),
+                    contents: bytemuck::cast_slice(&self.indices),
+                    usage: wgpu::BufferUsages::INDEX,
+                },
+            ));
             self.entity_count = entities.len();
         }
     }
@@ -170,7 +171,9 @@ impl Drop for Batch2D {
     fn drop(&mut self) {
         unsafe {
             let mut batch_ids = BATCH_IDS.lock().unwrap();
-            batch_ids.remove(batch_ids.binary_search(&self.id).unwrap());
+            batch_ids.sort_unstable();
+            let searched = batch_ids.binary_search(&self.id).unwrap();
+            batch_ids.remove(searched);
             drop(batch_ids);
         }
     }

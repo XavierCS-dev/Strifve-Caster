@@ -85,19 +85,19 @@ impl Entity2D {
         let id = unsafe { Entity2D::create_id() };
         let vertices = [
             Vertex2D {
+                position: [1.0, 1.0],
+                tex_pos: [1.0, 1.0],
+            },
+            Vertex2D {
+                position: [0.0, 1.0],
+                tex_pos: [0.0, 1.0],
+            },
+            Vertex2D {
+                position: [0.0, 0.0],
+                tex_pos: [0.0, 0.0],
+            },
+            Vertex2D {
                 position: [1.0, 0.0],
-                tex_pos: [1.0, 0.0],
-            },
-            Vertex2D {
-                position: [-1.0, 0.0],
-                tex_pos: [-1.0, 0.0],
-            },
-            Vertex2D {
-                position: [-1.0, 0.0],
-                tex_pos: [-1.0, 0.0],
-            },
-            Vertex2D {
-                position: [-1.0, 0.0],
                 tex_pos: [1.0, 0.0],
             },
         ];
@@ -175,7 +175,9 @@ impl Drop for Entity2D {
     fn drop(&mut self) {
         unsafe {
             let mut entity_ids = ENTITY_IDS.lock().unwrap();
-            entity_ids.remove(entity_ids.binary_search(&self.id).unwrap());
+            entity_ids.sort_unstable();
+            let searched = entity_ids.binary_search(&self.id).unwrap();
+            entity_ids.remove(searched);
             drop(entity_ids);
         }
     }
