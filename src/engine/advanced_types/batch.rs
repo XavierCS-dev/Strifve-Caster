@@ -65,38 +65,43 @@ impl Batch2D {
         }
     }
 
-    pub fn update(&mut self, entities: &Vec<Entity2D>, device: &wgpu::Device) {
+    pub fn update(&mut self, entities: &Vec<Entity2D>, device: &wgpu::Device, queue: &wgpu::Queue) {
         let mut recreate_index = false;
         if entities.len() != self.entity_count {
             recreate_index = true;
         }
+        self.entity_data.clear();
+        self.vertex_data.clear();
         for entity in entities {
             self.entity_data.push(entity.to_raw());
             for vertex in entity.vertices() {
                 self.vertex_data.push(*vertex);
             }
         }
-        //TEMP
-        if self.updated {
-            return;
-        }
-        self.updated = true;
-        //TEMP
 
-        self.entity_buffer = Some(
-            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Entity Buffer"),
-                contents: bytemuck::cast_slice(&self.entity_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            }),
-        );
-        self.vertex_buffer = Some(
-            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(&self.vertex_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            }),
-        );
+        if !self.updated {
+            self.entity_buffer = Some(
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Entity Buffer"),
+                    contents: bytemuck::cast_slice(&self.entity_data),
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                }),
+            );
+            self.vertex_buffer = Some(
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Vertex Buffer"),
+                    contents: bytemuck::cast_slice(&self.vertex_data),
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                }),
+            );
+            self.updated = true;
+        } else {
+            let e: &[u8] = bytemuck::cast_slice(&self.entity_data);
+            println!("{}", e.len());
+            queue.write_buffer(&self.entity_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.entity_data));
+            queue.write_buffer(&self.vertex_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.vertex_data));
+        }
+
         if recreate_index {
             let mut difference = entities.len() as i32 - self.entity_count as i32;
             self.entity_count += difference as usize;

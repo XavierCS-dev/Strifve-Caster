@@ -208,7 +208,7 @@ impl RenderData {
             render_pass.set_pipeline(&self.pipeline);
             // THis won't work until the shader is fixed
             for batch in &mut self.wall_batches {
-                batch.update(self.walls.get(&batch.id()).unwrap(), &self.device);
+                batch.update(self.walls.get(&batch.id()).unwrap(), &self.device, &self.queue);
                 render_pass.set_bind_group(0, batch.bind_group(), &[]);
                 render_pass.set_vertex_buffer(0, batch.vertex_buffer().unwrap().slice(..));
                 render_pass.set_vertex_buffer(1, batch.entity_buffer().unwrap().slice(..));
