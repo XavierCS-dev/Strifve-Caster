@@ -3,8 +3,18 @@ use crate::engine::primitives::{transformation::Transformation2D, vector::Vector
 use crate::engine::traits::update_entity::UpdateEntity;
 use rand::Rng;
 use std::sync::Mutex;
+use crate::engine::primitives::vector::Vector3;
 
-// TODO: CREATE IDs FOR ENTITIES AND REMOVE TEXTURE ID SYSTEM
+
+pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
+pub struct Entity3D {
+    position: Vector3<f64>,
+
+}
+
+
+
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -60,8 +70,6 @@ impl RawEntity2D {
         }
     }
 }
-
-pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 pub struct Entity2D {
     id: u32,
