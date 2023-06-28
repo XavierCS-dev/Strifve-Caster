@@ -29,8 +29,8 @@ impl Vertex2D {
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Zeroable, bytemuck::Pod)]
 pub struct Vertex3D {
-    pub position: [f32; 3],
-    pub tex_pos: [f32; 3],
+    pub position: [f32; 4],
+    pub tex_pos: [f32; 2],
 }
 
 impl Vertex3D {

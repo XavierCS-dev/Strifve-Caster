@@ -23,8 +23,6 @@ pub struct RenderData {
     surface: wgpu::Surface,
     window: Window,
     pipeline: wgpu::RenderPipeline,
-    wall_batches: Vec<Batch2D>,
-    walls: HashMap<u32, Vec<Entity2D>>,
 }
 
 impl RenderData {
@@ -80,34 +78,8 @@ impl RenderData {
                 },
             ],
         });
-        let batch_one = Batch2D::new("src/assets/yharon.png", &queue, &device, &bind_group_layout);
-        let batch_two = Batch2D::new(
-            "src/assets/calamitas.png",
-            &queue,
-            &device,
-            &bind_group_layout,
-        );
-        let entity_one = Entity2D::new(
-            batch_one.id(),
-            Vector2 { x: 0, y: 0 },
-            0.0,
-            1.0,
-            Vector2 { x: 0, y: 0 },
-        );
-        let entity_two = Entity2D::new(
-            batch_two.id(),
-            Vector2 { x: 0, y: 0 },
-            0.0,
-            1.0,
-            Vector2 { x: 0, y: 0 },
-        );
 
-        let mut walls: HashMap<u32, Vec<Entity2D>> = HashMap::new();
-        walls.insert(entity_one.texture_id(), vec![entity_one]);
-        walls.insert(entity_two.texture_id(), vec![entity_two]);
-        let mut wall_batches: Vec<Batch2D> = Vec::new();
-        wall_batches.push(batch_one);
-        wall_batches.push(batch_two);
+        // TODO: 3D Entity Creation
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),
@@ -138,10 +110,10 @@ impl RenderData {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[Vertex2D::descriptor(), RawEntity2D::descriptor()],
+                // TODO: Add RawEntity3D descriptor
+                buffers: &[Vertex3D::descriptor()],
             },
             primitive: wgpu::PrimitiveState {
-                // may want to change this to line list for raycaster...
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
@@ -175,8 +147,6 @@ impl RenderData {
             surface,
             window,
             pipeline,
-            wall_batches,
-            walls,
         }
     }
 
@@ -206,18 +176,7 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
             render_pass.set_pipeline(&self.pipeline);
-            // THis won't work until the shader is fixed
-            for batch in &mut self.wall_batches {
-                batch.update(self.walls.get(&batch.id()).unwrap(), &self.device, &self.queue);
-                render_pass.set_bind_group(0, batch.bind_group(), &[]);
-                render_pass.set_vertex_buffer(0, batch.vertex_buffer().unwrap().slice(..));
-                render_pass.set_vertex_buffer(1, batch.entity_buffer().unwrap().slice(..));
-                render_pass.set_index_buffer(
-                    batch.index_buffer().unwrap().slice(..),
-                    wgpu::IndexFormat::Uint16,
-                );
-                render_pass.draw_indexed(0..(batch.entity_count() * 6), 0, 0..batch.entity_count())
-            }
+            // TODO: Implement 3D rendering renderpass
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();

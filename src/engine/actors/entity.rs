@@ -8,6 +8,8 @@ use crate::engine::primitives::vector::Vector3;
 
 pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
+// TODO: Implement Entity3D
+
 pub struct Entity3D {
     position: Vector3<f64>,
 

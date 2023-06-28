@@ -6,6 +6,12 @@ use rand::Rng;
 use std::sync::Mutex;
 use wgpu::util::DeviceExt;
 
+
+
+pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
+// TODO: Implememnt Batch3D
+
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
 // This allows an easily modifiable group of entities with the same texture to be drawn together.
 // Having a Batch struct allows the use of separate buffers for each batch, without having to fight
@@ -16,8 +22,6 @@ use wgpu::util::DeviceExt;
 // of Batches.
 // However if a batch doesn't update, the buffer won't need to be reallocated. In the case of this engine,
 // this will be very rare due to the nature of raycasters, and may only apply to sprites.
-
-pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 pub struct Batch2D {
     id: u32,
