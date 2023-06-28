@@ -10,7 +10,7 @@ use wgpu::util::DeviceExt;
 
 pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
-// TODO: Implememnt Batch3D
+// TODO: Implement Batch3D
 
 // The idea of Batch2D is to collect all the raw data from the users, and store buffers, for each batch of entities.
 // This allows an easily modifiable group of entities with the same texture to be drawn together.
