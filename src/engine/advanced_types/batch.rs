@@ -96,8 +96,6 @@ impl Batch2D {
             );
             self.updated = true;
         } else {
-            let e: &[u8] = bytemuck::cast_slice(&self.entity_data);
-            println!("{}", e.len());
             queue.write_buffer(&self.entity_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.entity_data));
             queue.write_buffer(&self.vertex_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.vertex_data));
         }
