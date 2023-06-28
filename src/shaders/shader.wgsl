@@ -1,5 +1,8 @@
 // Vertex shader
 
+// TODO: Implement Camera Struct
+
+// TODO: Convert to Entity3D
 struct EntityInput {
     @location(2) position: vec2<u32>,
     @location(3) rotation_one: vec2<f32>,
@@ -24,7 +27,8 @@ fn vs_main(
     model: VertexInput,
     entity: EntityInput,
 ) -> VertexOutput {
-// TODO: do entity calculations on vertex
+    // TODO: do entity calculations on vertex
+    // TODO: convert to clip space here or elsewhere
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
     out.clip_position = vec4<f32>(model.position);
