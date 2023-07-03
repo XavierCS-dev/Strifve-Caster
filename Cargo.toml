@@ -17,6 +17,7 @@ anyhow = "1.0.71"
 num-traits = "0.2.15"
 once_cell = "1.18.0"
 rand = "0.8.5"
+cgmath = "0.18"
 
 [dependencies.image]
 version = "0.24"

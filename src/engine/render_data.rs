@@ -2,6 +2,7 @@ use super::actors::entity::Entity2D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
+use crate::engine::advanced_types::camera::Camera3D;
 use crate::engine::primitives::vector::Vector2;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
@@ -10,10 +11,57 @@ use bytemuck;
 use image::error::EncodingError;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-use wgpu::util::BufferInitDescriptor;
 use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
+use winit::event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent};
 use winit::window::Window;
+
+const VERTICES: &[Vertex3D] = &[
+    // font face
+    Vertex3D {
+        position: [1.0, -0.5, 2.0],
+        tex_pos: [1.0, 1.0 - 1.0],
+    },
+    Vertex3D {
+        position: [0.5, -0.5, 2.0],
+        tex_pos: [0.0, 1.0 - 1.0],
+    },
+    Vertex3D {
+        position: [0.5, -1.0, 2.0],
+        tex_pos: [0.0, 1.0 - 0.0],
+    },
+    Vertex3D {
+        position: [1.0, -1.0, 2.0],
+        tex_pos: [1.0, 1.0 - 0.0],
+    },
+    // top face
+    Vertex3D {
+        position: [1.0, -0.5, 2.5],
+        tex_pos: [1.0, 1.0 - 0.0],
+    },
+    Vertex3D {
+        position: [0.5, -0.5, 2.5],
+        tex_pos: [0.0, 1.0 - 0.0],
+    },
+    // Left face
+    Vertex3D {
+        position: [0.5, -1.0, 2.5],
+        tex_pos: [1.0, 1.0 - 1.0],
+    },
+    // Bottom Face:
+    Vertex3D {
+        position: [1.0, -1.0, 2.5],
+        tex_pos: [1.0, 0.0],
+    },
+    // Right face
+
+    // Back face
+];
+
+const INDICES: &[u16] = &[
+    0, 1, 2, 0, 2, 3, 4, 5, 1, 4, 1, 0, 1, 5, 6, 1, 6, 2, 3, 2, 6, 3, 6, 7, 4, 0, 3, 4, 3, 7, 5, 4,
+    7, 5, 7, 6,
+];
 
 pub struct RenderData {
     device: wgpu::Device,
@@ -23,6 +71,10 @@ pub struct RenderData {
     surface: wgpu::Surface,
     window: Window,
     pipeline: wgpu::RenderPipeline,
+    texture: Texture2D,
+    vert_buf: wgpu::Buffer,
+    index_buf: wgpu::Buffer,
+    camera: Camera3D,
 }
 
 impl RenderData {
@@ -80,15 +132,30 @@ impl RenderData {
         });
 
         // TODO: 3D Entity Creation
+        let texture = Texture2D::new(
+            "src/assets/calamitas.png",
+            &queue,
+            &device,
+            &bind_group_layout,
+        )
+        .unwrap();
+
+        let vert_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("vert_buf"),
+
+            contents: bytemuck::cast_slice(VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+
+        let index_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("index buf"),
+            contents: bytemuck::cast_slice(INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/shader.wgsl").into()),
-        });
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("pipeline layout"),
-            bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
         });
         let surface_capabilities = surface.get_capabilities(&adapter);
         let format = surface_capabilities.formats[0];
@@ -102,8 +169,16 @@ impl RenderData {
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: Vec::new(),
         };
+
         surface.configure(&device, &config);
 
+        let camera = Camera3D::new(45.0, config.width, config.height, &device);
+
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("pipeline layout"),
+            bind_group_layouts: &[&bind_group_layout, camera.bind_group_layout()],
+            push_constant_ranges: &[],
+        });
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             layout: Some(&pipeline_layout),
@@ -147,6 +222,10 @@ impl RenderData {
             surface,
             window,
             pipeline,
+            texture,
+            vert_buf,
+            index_buf,
+            camera,
         }
     }
 
@@ -175,19 +254,25 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
+            self.camera.update(&self.queue, &self.device);
             render_pass.set_pipeline(&self.pipeline);
             // TODO: Implement 3D rendering renderpass
+            render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
+            render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
+            render_pass.set_vertex_buffer(0, self.vert_buf.slice(..));
+            render_pass.set_index_buffer(self.index_buf.slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..INDICES.len() as u32, 0, 0..1);
         }
         self.queue.submit(Some(encoder.finish()));
         frame.present();
         Ok(())
     }
 
+    fn update() {}
+
+    fn process_inputs() {}
+
     pub fn window(&self) -> &Window {
         &self.window
-    }
-
-    pub fn resize(&self) -> Result<(), String> {
-        todo!()
     }
 }

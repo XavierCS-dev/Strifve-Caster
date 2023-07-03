@@ -6,8 +6,6 @@ use rand::Rng;
 use std::sync::Mutex;
 use wgpu::util::DeviceExt;
 
-
-
 pub static mut BATCH_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 // TODO: Implement Batch3D
@@ -84,24 +82,32 @@ impl Batch2D {
         }
 
         if !self.updated {
-            self.entity_buffer = Some(
-                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            self.entity_buffer = Some(device.create_buffer_init(
+                &wgpu::util::BufferInitDescriptor {
                     label: Some("Entity Buffer"),
                     contents: bytemuck::cast_slice(&self.entity_data),
                     usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-                }),
-            );
-            self.vertex_buffer = Some(
-                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                },
+            ));
+            self.vertex_buffer = Some(device.create_buffer_init(
+                &wgpu::util::BufferInitDescriptor {
                     label: Some("Vertex Buffer"),
                     contents: bytemuck::cast_slice(&self.vertex_data),
                     usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-                }),
-            );
+                },
+            ));
             self.updated = true;
         } else {
-            queue.write_buffer(&self.entity_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.entity_data));
-            queue.write_buffer(&self.vertex_buffer.as_ref().unwrap(), 0, bytemuck::cast_slice(&self.vertex_data));
+            queue.write_buffer(
+                &self.entity_buffer.as_ref().unwrap(),
+                0,
+                bytemuck::cast_slice(&self.entity_data),
+            );
+            queue.write_buffer(
+                &self.vertex_buffer.as_ref().unwrap(),
+                0,
+                bytemuck::cast_slice(&self.vertex_data),
+            );
         }
 
         if recreate_index {

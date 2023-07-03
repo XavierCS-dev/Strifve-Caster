@@ -29,7 +29,7 @@ impl Vertex2D {
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Zeroable, bytemuck::Pod)]
 pub struct Vertex3D {
-    pub position: [f32; 4],
+    pub position: [f32; 3],
     pub tex_pos: [f32; 2],
 }
 
@@ -45,7 +45,7 @@ impl Vertex3D {
                     shader_location: 0,
                 },
                 wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32x2,
                     offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
                 },

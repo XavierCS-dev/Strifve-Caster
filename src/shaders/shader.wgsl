@@ -13,7 +13,7 @@ struct EntityInput {
 };
 
 struct VertexInput {
-    @location(0) position: vec4<f32>,
+    @location(0) position: vec3<f32>,
     @location(1) tex_pos: vec2<f32>
 }
 
@@ -22,16 +22,24 @@ struct VertexOutput {
     @location(0) tex_pos: vec2<f32>,
 };
 
+
+struct Camera {
+    proj_mat: mat4x4<f32>,
+}
+
+
+@group(1) @binding(0)
+var<uniform> camera_mat: mat4x4<f32>;
 @vertex
 fn vs_main(
     model: VertexInput,
-    entity: EntityInput,
+    //entity: EntityInput,
 ) -> VertexOutput {
-    // TODO: do entity calculations on vertex
-    // TODO: convert to clip space here or elsewhere
+
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
-    out.clip_position = vec4<f32>(model.position);
+    out.clip_position = camera_mat * vec4<f32>(model.position, 1.0);
+
     return out;
 }
 

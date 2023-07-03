@@ -1,10 +1,9 @@
+use crate::engine::primitives::vector::Vector3;
 use crate::engine::primitives::vertex::Vertex2D;
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
 use crate::engine::traits::update_entity::UpdateEntity;
 use rand::Rng;
 use std::sync::Mutex;
-use crate::engine::primitives::vector::Vector3;
-
 
 pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
@@ -12,11 +11,7 @@ pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 pub struct Entity3D {
     position: Vector3<f64>,
-
 }
-
-
-
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
