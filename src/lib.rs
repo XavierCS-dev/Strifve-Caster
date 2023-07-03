@@ -21,8 +21,9 @@ pub async fn run() {
             Event::WindowEvent {
                 window_id,
                 event: WindowEvent::CloseRequested,
-            } if window_id == render_data.window().id() => *control_flow = ControlFlow::Exit,
+            } if window_id == render_data.window().id() => if !render_data.input(event) { *control_flow = ControlFlow::Exit,}
             Event::RedrawRequested(window_id) if window_id == render_data.window().id() => {
+                render_data.update();
                 render_data.render().unwrap();
             }
             Event::RedrawEventsCleared => {

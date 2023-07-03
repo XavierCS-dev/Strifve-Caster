@@ -268,9 +268,11 @@ impl RenderData {
         Ok(())
     }
 
-    fn update() {}
+    pub fn update(&mut self) {}
 
-    fn process_inputs() {}
+    pub fn input(&mut self, event: &WindowEvent) {}
+
+    pub fn process_inputs(&mut self, event: &WindowEvent) {}
 
     pub fn window(&self) -> &Window {
         &self.window
