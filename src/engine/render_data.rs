@@ -270,7 +270,9 @@ impl RenderData {
 
     pub fn update(&mut self) {}
 
-    pub fn input(&mut self, event: &WindowEvent) {}
+    pub fn input(&mut self, event: &WindowEvent) -> bool {
+        false
+    }
 
     pub fn process_inputs(&mut self, event: &WindowEvent) {}
 

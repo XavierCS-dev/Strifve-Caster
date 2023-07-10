@@ -1,5 +1,6 @@
+use crate::engine::primitives::quarternion::Quarternion;
 use crate::engine::primitives::vector::Vector3;
-use crate::engine::primitives::vertex::Vertex2D;
+use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
 use crate::engine::traits::update_entity::UpdateEntity;
 use rand::Rng;
@@ -10,7 +11,12 @@ pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 // TODO: Implement Entity3D
 
 pub struct Entity3D {
+    id: u32,
     position: Vector3<f64>,
+    rotation: Quarternion<f64>,
+    origin: Vector3<f64>,
+    vertices: Vec<Vertex3D>,
+    indices: Vec<Vertex3D>,
 }
 
 #[repr(C)]

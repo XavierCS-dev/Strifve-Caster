@@ -20,8 +20,14 @@ pub async fn run() {
         match event {
             Event::WindowEvent {
                 window_id,
-                event: WindowEvent::CloseRequested,
-            } if window_id == render_data.window().id() => if !render_data.input(event) { *control_flow = ControlFlow::Exit,}
+                ref event,
+            } if window_id == render_data.window().id() => {
+                if !render_data.input(&event) {
+                    // This needs an extra match statement, as the window will close if the user is
+                    // not holding down a key or doing some other input
+                    *control_flow = ControlFlow::Exit;
+                }
+            }
             Event::RedrawRequested(window_id) if window_id == render_data.window().id() => {
                 render_data.update();
                 render_data.render().unwrap();
