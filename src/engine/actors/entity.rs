@@ -1,4 +1,4 @@
-use crate::engine::primitives::quarternion::Quarternion;
+use crate::engine::primitives::quaternion::Quaternion;
 use crate::engine::primitives::transformation::Transformation3D;
 use crate::engine::primitives::vector::Vector3;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
@@ -16,7 +16,7 @@ pub struct Entity3D {
     // Position in world space
     position: Vector3<f64>,
     scale: f32,
-    transformation: Quarternion<f32>,
+    transformation: Quaternion<f32>,
     rotation: f32,
     origin: Vector3<f64>,
     vertices: Vec<Vertex3D>,
