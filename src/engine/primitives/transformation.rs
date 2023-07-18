@@ -1,3 +1,5 @@
+pub struct Transformation3D {}
+
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Transformation2D {

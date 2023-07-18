@@ -10,7 +10,7 @@ use engine::render_data::{self, RenderData};
 pub async fn run() {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_title("Learn WGPU")
+        .with_title("Strfive Caster")
         .build(&event_loop)
         .unwrap();
     window.set_resizable(false);
@@ -22,7 +22,7 @@ pub async fn run() {
                 window_id,
                 ref event,
             } if window_id == render_data.window().id() => {
-                if !render_data.input(&event) {
+                if render_data.input(&event) {
                     // This needs an extra match statement, as the window will close if the user is
                     // not holding down a key or doing some other input
                     *control_flow = ControlFlow::Exit;

@@ -1,4 +1,5 @@
 use crate::engine::primitives::quarternion::Quarternion;
+use crate::engine::primitives::transformation::Transformation3D;
 use crate::engine::primitives::vector::Vector3;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::primitives::{transformation::Transformation2D, vector::Vector2};
@@ -12,11 +13,32 @@ pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 pub struct Entity3D {
     id: u32,
+    // Position in world space
     position: Vector3<f64>,
-    rotation: Quarternion<f64>,
+    scale: f32,
+    transformation: Quarternion<f32>,
+    rotation: f32,
     origin: Vector3<f64>,
     vertices: Vec<Vertex3D>,
     indices: Vec<Vertex3D>,
+}
+
+impl Entity3D {
+    pub fn new() -> Self {
+        todo!()
+    }
+
+    pub fn rotation() -> f32 {
+        todo!()
+    }
+
+    pub fn position() -> Vector3<f64> {
+        todo!()
+    }
+
+    pub fn scale() -> f32 {
+        todo!()
+    }
 }
 
 #[repr(C)]
