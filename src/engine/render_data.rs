@@ -3,7 +3,9 @@ use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
 use crate::engine::advanced_types::camera::Camera3D;
+use crate::engine::primitives::quaternion::Quaternion;
 use crate::engine::primitives::vector::Vector2;
+use crate::engine::primitives::vector::Vector3;
 use crate::engine::primitives::vertex::{Vertex2D, Vertex3D};
 use crate::engine::texture;
 use crate::engine::texture::Texture2D;
@@ -75,6 +77,7 @@ pub struct RenderData {
     vert_buf: wgpu::Buffer,
     index_buf: wgpu::Buffer,
     camera: Camera3D,
+    rotation: Quaternion,
 }
 
 impl RenderData {
@@ -130,6 +133,15 @@ impl RenderData {
                 },
             ],
         });
+
+        let rotation = Quaternion::new(
+            Vector3 {
+                x: 0.75,
+                y: -0.75,
+                z: 2.25,
+            },
+            45.0,
+        );
 
         // TODO: 3D Entity Creation
         let texture = Texture2D::new(
@@ -226,6 +238,7 @@ impl RenderData {
             vert_buf,
             index_buf,
             camera,
+            rotation,
         }
     }
 
