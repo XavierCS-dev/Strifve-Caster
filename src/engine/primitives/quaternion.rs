@@ -9,6 +9,9 @@ pub struct Quaternion {
 
 impl Quaternion {
     pub fn new(axis: Vector3<f32>, angle: f32) -> Self {
+        if !((axis.x.powi(2) + axis.y.powi(2) + axis.z.powi(2)) == 1) {
+            panic!("Length of vector supplied to unit quaternion not equal to 1")
+        }
         Self { angle, axis }
     }
 
