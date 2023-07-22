@@ -77,7 +77,7 @@ pub struct RenderData {
     vert_buf: wgpu::Buffer,
     index_buf: wgpu::Buffer,
     camera: Camera3D,
-    rotation: Quaternion,
+    rotation: Quaternion<f32>,
 }
 
 impl RenderData {
