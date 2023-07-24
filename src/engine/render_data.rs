@@ -141,6 +141,7 @@ impl RenderData {
                 z: 2.25,
             },
             45.0,
+            false,
         );
 
         // TODO: 3D Entity Creation

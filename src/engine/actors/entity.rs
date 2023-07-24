@@ -70,10 +70,10 @@ impl Entity3D {
     }
 
     pub fn set_texture(&mut self, texture_id: u32) {
-        self.texture_id = texture_id;
+        self.texture_id = Some(texture_id);
     }
 
-    pub fn texture_id(&self) -> u32 {
+    pub fn texture_id(&self) -> Option<u32> {
         self.texture_id
     }
 
