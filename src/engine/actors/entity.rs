@@ -9,15 +9,22 @@ use std::sync::Mutex;
 
 pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
+pub struct RawEntity3D {
+    position: [f32; 3],
+    rotation: [[f32; 3]; 3],
+    origin: [f32; 3],
+    scale: [[f32; 3]; 3],
+}
+
 // TODO: Implement Entity3D
 
 pub struct Entity3D {
     id: u32,
+    texture_id: u32,
     // Position in world space
     position: Vector3<f64>,
     scale: f32,
-    transformation: Quaternion<f32>,
-    rotation: f32,
+    rotation: Quaternion<f32>,
     origin: Vector3<f64>,
     vertices: Vec<Vertex3D>,
     indices: Vec<Vertex3D>,
@@ -28,16 +35,39 @@ impl Entity3D {
         todo!()
     }
 
-    pub fn rotation() -> f32 {
-        todo!()
+    pub fn rotation(&self) -> &Quaternion<f32> {
+        &self.rotation
     }
 
-    pub fn position() -> Vector3<f64> {
-        todo!()
+    pub fn position(&self) -> &Vector3<f64> {
+        &self.position
     }
 
-    pub fn scale() -> f32 {
-        todo!()
+    pub fn scale(&self) -> f32 {
+        self.scale
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn set_texture(&mut self, texture_id: u32) {
+        self.texture_id = texture_id;
+    }
+
+    pub fn texture_id(&self) -> u32 {
+        self.texture_id
+    }
+
+    unsafe fn create_id() -> u32 {
+        let mut num = rand::thread_rng().gen_range(0..u32::MAX);
+        let mut entity_ids = ENTITY_IDS.lock().unwrap();
+        while entity_ids.contains(&num) {
+            num = rand::thread_rng().gen_range(0..u32::MAX);
+        }
+        entity_ids.push(num);
+        drop(entity_ids);
+        num
     }
 }
 
