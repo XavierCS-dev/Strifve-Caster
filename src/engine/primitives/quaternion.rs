@@ -11,15 +11,21 @@ where
 {
     angle: T,
     axis: Vector3<T>,
+    unit: bool,
 }
 
 impl<T> Quaternion<T>
 where
     T: NumCast + Copy + num_traits::Num + Float,
 {
-    // Replace Vector3 here with a unit vector
-    pub fn new(axis: Vector3<T>, angle: T) -> Self {
-        Self { angle, axis }
+    /*
+        axis: the axis to rotate around
+        angle: the angle to rotate
+        unit: whether the quaternion is a unit quaternion
+            (I am worried about floating point inaccuracies causing scaling)
+    */
+    pub fn new(axis: Vector3<T>, angle: T, unit: bool) -> Self {
+        Self { angle, axis, unit }
     }
 
     pub fn set_angle(&mut self, angle: T) {
@@ -48,7 +54,12 @@ where
         let x = normal.x;
         let y = normal.y;
         let z = normal.z;
-        let two_s = 2.0 / normal.square_magnitude();
+        let mut two_s = 0.0;
+        if self.unit {
+            two_s = 2.0;
+        } else {
+            two_s = 2.0 / normal.square_magnitude();
+        }
         // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         [
             [
