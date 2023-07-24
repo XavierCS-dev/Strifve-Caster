@@ -20,7 +20,7 @@ pub struct RawEntity3D {
 
 pub struct Entity3D {
     id: u32,
-    texture_id: u32,
+    texture_id: Option<u32>,
     // Position in world space
     position: Vector3<f64>,
     scale: f32,
@@ -31,8 +31,26 @@ pub struct Entity3D {
 }
 
 impl Entity3D {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(
+        texture_id: Option<u32>,
+        position: Vector3<f64>,
+        scale: f32,
+        rotation: Quaternion<f32>,
+        origin: Vector3<f64>,
+        vertices: Vec<Vertex3D>,
+        indices: Vec<Vertex3D>,
+    ) -> Self {
+        let id = unsafe { Entity3D::create_id() };
+        Self {
+            id,
+            texture_id,
+            position,
+            scale,
+            rotation,
+            origin,
+            vertices,
+            indices,
+        }
     }
 
     pub fn rotation(&self) -> &Quaternion<f32> {
