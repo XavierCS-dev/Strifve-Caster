@@ -9,6 +9,8 @@ use std::sync::Mutex;
 
 pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Zeroable, bytemuck::Pod)]
 pub struct RawEntity3D {
     position: [f32; 3],
     rotation: [[f32; 3]; 3],
@@ -27,7 +29,7 @@ pub struct Entity3D {
     rotation: Quaternion<f32>,
     origin: Vector3<f64>,
     vertices: Vec<Vertex3D>,
-    indices: Vec<Vertex3D>,
+    indices: u32,
 }
 
 impl Entity3D {
@@ -38,7 +40,7 @@ impl Entity3D {
         rotation: Quaternion<f32>,
         origin: Vector3<f64>,
         vertices: Vec<Vertex3D>,
-        indices: Vec<Vertex3D>,
+        indices: u32,
     ) -> Self {
         let id = unsafe { Entity3D::create_id() };
         Self {
@@ -57,12 +59,24 @@ impl Entity3D {
         &self.rotation
     }
 
+    pub fn set_rotation(&mut self, rotation: Quaternion<f32>) {
+        self.rotation = rotation;
+    }
+
     pub fn position(&self) -> &Vector3<f64> {
         &self.position
     }
 
+    pub fn set_position(&mut self, position: Vector3<f64>) {
+        self.position = position;
+    }
+
     pub fn scale(&self) -> f32 {
         self.scale
+    }
+
+    pub fn set_scale(&mut self, scale: f32) {
+        self.scale = scale;
     }
 
     pub fn id(&self) -> u32 {
@@ -75,6 +89,15 @@ impl Entity3D {
 
     pub fn texture_id(&self) -> Option<u32> {
         self.texture_id
+    }
+
+    pub fn vertices(&self) -> (&Vec<Vertex3D>, u32) {
+        (&self.vertices, self.indices)
+    }
+
+    pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: u32) {
+        self.vertices = vertices;
+        self.indices = indices;
     }
 
     unsafe fn create_id() -> u32 {
