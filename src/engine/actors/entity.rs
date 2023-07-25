@@ -18,6 +18,58 @@ pub struct RawEntity3D {
     scale: [[f32; 3]; 3],
 }
 
+impl RawEntity3D {
+    pub fn descriptor() -> wgpu::VertexBufferLayout<'static> {
+        use std::mem;
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<RawEntity3D>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Instance,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 3,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 3,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 5,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 9]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 6,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 7,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 8,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x3,
+                    shader_location: 9,
+                },
+            ],
+        }
+    }
+}
+
 // TODO: Implement Entity3D
 
 pub struct Entity3D {
