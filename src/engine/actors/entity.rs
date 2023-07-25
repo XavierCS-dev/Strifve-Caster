@@ -24,10 +24,10 @@ pub struct Entity3D {
     id: u32,
     texture_id: Option<u32>,
     // Position in world space
-    position: Vector3<f64>,
+    position: Vector3<f32>,
     scale: f32,
     rotation: Quaternion<f32>,
-    origin: Vector3<f64>,
+    origin: Vector3<f32>,
     vertices: Vec<Vertex3D>,
     indices: u32,
 }
@@ -35,13 +35,14 @@ pub struct Entity3D {
 impl Entity3D {
     pub fn new(
         texture_id: Option<u32>,
-        position: Vector3<f64>,
+        position: Vector3<f32>,
         scale: f32,
         rotation: Quaternion<f32>,
-        origin: Vector3<f64>,
+        origin: Vector3<f32>,
         vertices: Vec<Vertex3D>,
         indices: u32,
     ) -> Self {
+        // origin will need to be calculated instead of being a param
         let id = unsafe { Entity3D::create_id() };
         Self {
             id,
@@ -63,11 +64,11 @@ impl Entity3D {
         self.rotation = rotation;
     }
 
-    pub fn position(&self) -> &Vector3<f64> {
+    pub fn position(&self) -> &Vector3<f32> {
         &self.position
     }
 
-    pub fn set_position(&mut self, position: Vector3<f64>) {
+    pub fn set_position(&mut self, position: Vector3<f32>) {
         self.position = position;
     }
 
@@ -96,6 +97,7 @@ impl Entity3D {
     }
 
     pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: u32) {
+        // Origin will need to be recalculated
         self.vertices = vertices;
         self.indices = indices;
     }
@@ -109,6 +111,19 @@ impl Entity3D {
         entity_ids.push(num);
         drop(entity_ids);
         num
+    }
+
+    pub fn to_raw(&self) -> RawEntity3D {
+        RawEntity3D {
+            position: self.position.to_raw(),
+            scale: [
+                [self.scale, 0.0, 0.0],
+                [0.0, self.scale, 0.0],
+                [0.0, 0.0, self.scale],
+            ],
+            origin: self.origin.to_raw(),
+            rotation: self.rotation.to_raw(),
+        }
     }
 }
 
