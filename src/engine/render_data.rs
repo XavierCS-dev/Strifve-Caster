@@ -1,4 +1,6 @@
 use super::actors::entity::Entity2D;
+use super::actors::entity::Entity3D;
+use super::actors::entity::RawEntity3D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
@@ -77,7 +79,7 @@ pub struct RenderData {
     vert_buf: wgpu::Buffer,
     index_buf: wgpu::Buffer,
     camera: Camera3D,
-    rotation: Quaternion<f32>,
+    entity: Entity3D,
 }
 
 impl RenderData {
@@ -153,6 +155,24 @@ impl RenderData {
         )
         .unwrap();
 
+        let entity = Entity3D::new(
+            Some(0),
+            Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            1.0,
+            rotation,
+            Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            Vec::from(VERTICES),
+            0,
+        );
+
         let vert_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("vert_buf"),
 
@@ -199,7 +219,7 @@ impl RenderData {
                 module: &shader,
                 entry_point: "vs_main",
                 // TODO: Add RawEntity3D descriptor
-                buffers: &[Vertex3D::descriptor()],
+                buffers: &[Vertex3D::descriptor(), RawEntity3D::descriptor()],
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -239,7 +259,6 @@ impl RenderData {
             vert_buf,
             index_buf,
             camera,
-            rotation,
         }
     }
 

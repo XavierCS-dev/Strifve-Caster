@@ -81,7 +81,7 @@ pub struct Entity3D {
     rotation: Quaternion<f32>,
     origin: Vector3<f32>,
     vertices: Vec<Vertex3D>,
-    indices: u32,
+    indices: Vec<u32>,
 }
 
 impl Entity3D {
@@ -92,7 +92,7 @@ impl Entity3D {
         rotation: Quaternion<f32>,
         origin: Vector3<f32>,
         vertices: Vec<Vertex3D>,
-        indices: u32,
+        indices: Vec<u32>,
     ) -> Self {
         // origin will need to be calculated instead of being a param
         let id = unsafe { Entity3D::create_id() };
@@ -144,11 +144,11 @@ impl Entity3D {
         self.texture_id
     }
 
-    pub fn vertices(&self) -> (&Vec<Vertex3D>, u32) {
+    pub fn vertices(&self) -> (&Vec<Vertex3D>, Vec<u32>) {
         (&self.vertices, self.indices)
     }
 
-    pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: u32) {
+    pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: Vec<u32>) {
         // Origin will need to be recalculated
         self.vertices = vertices;
         self.indices = indices;

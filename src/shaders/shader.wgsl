@@ -4,12 +4,14 @@
 
 // TODO: Convert to Entity3D
 struct EntityInput {
-    @location(2) position: vec2<u32>,
-    @location(3) rotation_one: vec2<f32>,
-    @location(4) rotation_two: vec2<f32>,
-    @location(5) scale_one: vec2<f32>,
-    @location(6) scale_two: vec2<f32>,
-    @location(7) origin: vec2<u32>,
+    @location(2) position: vec3<f32>,
+    @location(3) rotation_one: vec3<f32>,
+    @location(4) rotation_two: vec3<f32>,
+    @location(5) rotation_three: vec3<f32>,
+    @location(6) origin: vec3<f32>,
+    @location(7) scale_one: vec3<f32>,
+    @location(7) scale_two: vec3<f32>,
+    @location(9) scale_three: vec3<f32>,
 };
 
 struct VertexInput {
