@@ -28,7 +28,7 @@ impl RawEntity3D {
                 wgpu::VertexAttribute {
                     offset: 0,
                     format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 3,
+                    shader_location: 2,
                 },
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
@@ -144,8 +144,8 @@ impl Entity3D {
         self.texture_id
     }
 
-    pub fn vertices(&self) -> (&Vec<Vertex3D>, Vec<u32>) {
-        (&self.vertices, self.indices)
+    pub fn vertices(&self) -> (&Vec<Vertex3D>, &Vec<u32>) {
+        (&self.vertices, &self.indices)
     }
 
     pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: Vec<u32>) {

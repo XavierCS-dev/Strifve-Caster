@@ -10,7 +10,7 @@ struct EntityInput {
     @location(5) rotation_three: vec3<f32>,
     @location(6) origin: vec3<f32>,
     @location(7) scale_one: vec3<f32>,
-    @location(7) scale_two: vec3<f32>,
+    @location(8) scale_two: vec3<f32>,
     @location(9) scale_three: vec3<f32>,
 };
 
@@ -35,9 +35,15 @@ var<uniform> camera_mat: mat4x4<f32>;
 @vertex
 fn vs_main(
     model: VertexInput,
-    //entity: EntityInput,
+    entity: EntityInput,
 ) -> VertexOutput {
 
+    let rotation = mat3x3<f32> (
+        entity.rotation_one,
+        entity.rotation_two,
+        entity.rotation_three,  
+    );
+    let transformed = model.position * rotation;
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
     let axis = vec3<f32>(0.75, -0.75, 2.25);

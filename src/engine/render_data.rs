@@ -80,6 +80,7 @@ pub struct RenderData {
     index_buf: wgpu::Buffer,
     camera: Camera3D,
     entity: Entity3D,
+    entity_buf: wgpu::Buffer,
 }
 
 impl RenderData {
@@ -143,7 +144,7 @@ impl RenderData {
                 z: 2.25,
             },
             45.0,
-            false,
+            true,
         );
 
         // TODO: 3D Entity Creation
@@ -170,8 +171,14 @@ impl RenderData {
                 z: 0.0,
             },
             Vec::from(VERTICES),
-            0,
+            Vec::new(),
         );
+
+        let entity_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Index buf"),
+            contents: bytemuck::cast_slice(&[entity.to_raw()]),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
 
         let vert_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("vert_buf"),
@@ -259,12 +266,13 @@ impl RenderData {
             vert_buf,
             index_buf,
             camera,
+            entity,
+            entity_buf,
         }
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let frame = self.surface.get_current_texture()?;
-        use core::borrow;
         let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -293,6 +301,7 @@ impl RenderData {
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, self.vert_buf.slice(..));
+            render_pass.set_vertex_buffer(1, self.entity_buf.slice(..));
             render_pass.set_index_buffer(self.index_buf.slice(..), wgpu::IndexFormat::Uint16);
             render_pass.draw_indexed(0..INDICES.len() as u32, 0, 0..1);
         }
