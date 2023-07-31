@@ -136,16 +136,17 @@ impl RenderData {
                 },
             ],
         });
-
-        let rotation = Quaternion::new(
-            Vector3 {
-                x: 0.75,
-                y: -0.75,
-                z: 2.25,
-            },
-            45.0,
-            true,
+        let mut ran_vec = Vector3 {
+            x: 1.0 as f32,
+            y: 1.0 as f32,
+            z: 1.0 as f32,
+        };
+        ran_vec.normalise();
+        println!(
+            "{}",
+            (ran_vec.x.powi(2) + ran_vec.y.powi(2) + ran_vec.z.powi(2))
         );
+        let rotation = Quaternion::new(ran_vec, 45.0, true);
 
         // TODO: 3D Entity Creation
         let texture = Texture2D::new(

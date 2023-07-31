@@ -43,11 +43,12 @@ fn vs_main(
         entity.rotation_two,
         entity.rotation_three,  
     );
-    let transformed = model.position * rotation;
+    // rotation is skewed and scaled..fix this. Also, use origin of object to move whole object to origin
+    // not vertices as this will cause 0 multiplication to occur
+    let transformed = ((model.position - vec3<f32>(0.75, -0.75, 2.25)) * rotation) + vec3<f32>(0.75, -0.75, 2.25);
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
-    let axis = vec3<f32>(0.75, -0.75, 2.25);
-    out.clip_position = camera_mat * vec4<f32>(model.position, 1.0);
+    out.clip_position = camera_mat * vec4<f32>(transformed, 1.0);
 
     return out;
 }
