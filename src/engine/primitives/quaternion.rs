@@ -28,12 +28,9 @@ where
         Self { angle, axis, unit }
     }
 
-    pub fn set_angle(&mut self, angle: T) {
-        self.angle = angle;
-    }
-
-    pub fn set_axis(&mut self, axis: Vector3<T>) {
+    pub fn set_rotation(&mut self, axis: Vector3<T>, angle: T) {
         self.axis = axis;
+        self.angle = angle;
     }
 
     pub fn axis(&self) -> &Vector3<T> {
