@@ -65,7 +65,7 @@ where
                 two_s * (x * z - y * angle),
             ],
             [
-                two_s * (x * z - z * angle),
+                two_s * (x * y - z * angle),
                 1.0 - two_s * (x.powi(2) + z.powi(2)),
                 two_s * (y * z + x * angle),
             ],
