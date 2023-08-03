@@ -1,6 +1,11 @@
 # Effect Engine 2
 A stylised full 3D engine designed to feel and play like a 2D raycaster, with 3D quality of life features.
 
+
+## Currently Working On:
+3D rotation with quaternions. At the current moment, the rotations are incorrect, the object appears skewed
+or completely broken depending on the order of multiplication, which I still haven't worked out.
+
 ## Roadmap
 The completion targets are my estimate of when I think I will have things done by.
 There is no guarantee and they are likely to be inaccurate as I cannot predict my free time
