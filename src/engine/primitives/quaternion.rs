@@ -42,7 +42,7 @@ where
     }
 
     pub fn to_raw(&self) -> [[f32; 3]; 3] {
-        let angle = (self.angle.to_f32().unwrap() * PI) / 180.0);
+        let angle = ((self.angle.to_f32().unwrap() * PI) / 180.0);
         let x = self.axis.x.to_f32().unwrap();
         let y = self.axis.y.to_f32().unwrap();
         let z = self.axis.z.to_f32().unwrap();
