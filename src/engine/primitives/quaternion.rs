@@ -46,12 +46,12 @@ where
         let x = self.axis.x.to_f32().unwrap();
         let y = self.axis.y.to_f32().unwrap();
         let z = self.axis.z.to_f32().unwrap();
-        let normal = Vector3 { x, y, z };
+        let axis = Vector3 { x, y, z };
         let two_s;
         if self.unit {
             two_s = 2.0;
         } else {
-            two_s = 2.0 / normal.square_magnitude();
+            two_s = 2.0 / axis.square_magnitude();
         }
         // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         [
