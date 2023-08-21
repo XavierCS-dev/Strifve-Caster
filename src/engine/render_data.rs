@@ -23,38 +23,38 @@ use winit::window::Window;
 const VERTICES: &[Vertex3D] = &[
     // font face
     Vertex3D {
-        position: [1.0, -0.5, 2.0],
+        position: [0.5, 0.5, -0.5],
         tex_pos: [1.0, 1.0 - 1.0],
     },
     Vertex3D {
-        position: [0.5, -0.5, 2.0],
+        position: [-0.5, 0.5, -0.5],
         tex_pos: [0.0, 1.0 - 1.0],
     },
     Vertex3D {
-        position: [0.5, -1.0, 2.0],
+        position: [-0.5, -0.5, -0.5],
         tex_pos: [0.0, 1.0 - 0.0],
     },
     Vertex3D {
-        position: [1.0, -1.0, 2.0],
+        position: [0.5, -0.5, -0.5],
         tex_pos: [1.0, 1.0 - 0.0],
     },
     // top face
     Vertex3D {
-        position: [1.0, -0.5, 2.5],
+        position: [0.5, 0.5, 0.5],
         tex_pos: [1.0, 1.0 - 0.0],
     },
     Vertex3D {
-        position: [0.5, -0.5, 2.5],
+        position: [-0.5, 0.5, 0.5],
         tex_pos: [0.0, 1.0 - 0.0],
     },
     // Left face
     Vertex3D {
-        position: [0.5, -1.0, 2.5],
+        position: [-0.5, -0.5, 0.5],
         tex_pos: [1.0, 1.0 - 1.0],
     },
     // Bottom Face:
     Vertex3D {
-        position: [1.0, -1.0, 2.5],
+        position: [0.5, -0.5, 0.5],
         tex_pos: [1.0, 0.0],
     },
     // Right face
@@ -160,11 +160,11 @@ impl RenderData {
         let entity = Entity3D::new(
             Some(0),
             Vector3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
+                x: 0.5,
+                y: -0.0,
+                z: 2.0,
             },
-            1.0,
+            0.5,
             rotation,
             Vector3 {
                 x: 0.0,
