@@ -53,7 +53,7 @@ fn vs_main(
     let transformed = (rotation * model.position * scale) + entity.position;
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
-    out.clip_position = camera_mat * (vec4<f32>(transformed, 1.0);
+    out.clip_position = camera_mat * vec4<f32>(transformed, 1.0);
 
     return out;
 }
