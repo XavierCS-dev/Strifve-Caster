@@ -38,22 +38,27 @@ fn vs_main(
     entity: EntityInput,
 ) -> VertexOutput {
 
-    let rotation = mat3x3<f32> (
-        entity.rotation_one,
-        entity.rotation_two,
-        entity.rotation_three,  
+    let rotation = mat4x4<f32> (
+        vec4<f32>(entity.rotation_one, 0.0),
+        vec4<f32>(entity.rotation_two, 0.0),
+        vec4<f32>(entity.rotation_three, 0.0),
+        vec4<f32>(0.0,0.0,0.0,1.0),  
     );
+    let translation = mat4x4<f32> (
+        vec4<f32>(1.0,0.0,0.0,0.0),
+        vec4<f32>(0.0,1.0,0.0,0.0),
+        vec4<f32>(0.0,0.0,1.0,0.0),
+        vec4<f32>(0.0,0.0,5.0,1.0), 
+    );
+    let transformation = translation * rotation;
     let scale = mat3x3<f32> (
         entity.scale_one,
         entity.scale_two,
         entity.scale_three,
     );
-    // rotation is skewed and scaled..fix this. Also, use origin of object to move whole object to origin
-    // not vertices as this will cause 0 multiplication to occur
-    let transformed = (model.position * rotation * vec3<f32>(0.5, 0.5, 0.5)) + entity.position;
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
-    out.clip_position = camera_mat * vec4<f32>(transformed, 1.0);
+    out.clip_position = camera_mat * transformation * vec4<f32>(model.position, 1.0);
 
     return out;
 }

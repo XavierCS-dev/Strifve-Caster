@@ -137,9 +137,9 @@ impl RenderData {
             ],
         });
         let mut ran_vec = Vector3 {
-            x: 0.0 as f32,
+            x: 1.0 as f32,
             y: 1.0 as f32,
-            z: 0.0 as f32,
+            z: 1.0 as f32,
         };
         ran_vec.normalise();
         println!(
@@ -162,7 +162,7 @@ impl RenderData {
             Vector3 {
                 x: 0.0,
                 y: 0.0,
-                z: 2.0,
+                z: 4.0,
             },
             0.5,
             rotation,
