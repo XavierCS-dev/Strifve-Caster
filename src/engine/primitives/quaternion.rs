@@ -43,9 +43,9 @@ where
 
     pub fn to_raw(&self) -> [[f32; 3]; 3] {
         let angle = (self.angle.to_f32().unwrap().to_radians() / 2.0).cos();
-        let x = self.axis.x.to_f32().unwrap();
-        let y = self.axis.y.to_f32().unwrap();
-        let z = self.axis.z.to_f32().unwrap();
+        let x = self.axis.x.to_f32().unwrap() * (angle / 2.0).sin();
+        let y = self.axis.y.to_f32().unwrap() * (angle / 2.0).sin();
+        let z = self.axis.z.to_f32().unwrap() * (angle / 2.0).sin();
         let axis = Vector3 { x, y, z };
         let two_s;
         if self.unit {
