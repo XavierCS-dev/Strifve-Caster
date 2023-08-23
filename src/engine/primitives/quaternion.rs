@@ -47,13 +47,7 @@ where
         let x = self.axis.x.to_f32().unwrap() * (angle / 2.0).sin();
         let y = self.axis.y.to_f32().unwrap() * (angle / 2.0).sin();
         let z = self.axis.z.to_f32().unwrap() * (angle / 2.0).sin();
-        let axis = Vector3 { x, y, z };
-        let two_s;
-        if self.unit {
-            two_s = 2.0;
-        } else {
-            two_s = 2.0 / axis.square_magnitude();
-        }
+        println!("quaternion: {}w + {}i + {}j + {}k", w, x, y, z);
         // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         [
             [

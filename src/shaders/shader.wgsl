@@ -5,13 +5,13 @@
 // TODO: Convert to Entity3D
 struct EntityInput {
     @location(2) position: vec3<f32>,
-    @location(3) rotation_one: vec3<f32>,
-    @location(4) rotation_two: vec3<f32>,
-    @location(5) rotation_three: vec3<f32>,
+    @location(3) scale_one: vec3<f32>,
+    @location(4) scale_two: vec3<f32>,
+    @location(5) scale_three: vec3<f32>,
     @location(6) origin: vec3<f32>,
-    @location(7) scale_one: vec3<f32>,
-    @location(8) scale_two: vec3<f32>,
-    @location(9) scale_three: vec3<f32>,
+    @location(7) rotation_one: vec3<f32>,
+    @location(8) rotation_two: vec3<f32>,
+    @location(9) rotation_three: vec3<f32>,
 };
 
 struct VertexInput {
@@ -48,7 +48,7 @@ fn vs_main(
         vec4<f32>(1.0,0.0,0.0,0.0),
         vec4<f32>(0.0,1.0,0.0,0.0),
         vec4<f32>(0.0,0.0,1.0,0.0),
-        vec4<f32>(0.0,0.0,5.0,1.0), 
+        vec4<f32>(0.0,0.0,3.0,1.0), 
     );
     let transformation = translation * rotation;
     let scale = mat3x3<f32> (

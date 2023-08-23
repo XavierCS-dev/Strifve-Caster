@@ -41,27 +41,27 @@ impl RawEntity3D {
                     shader_location: 4,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 9]>() as wgpu::BufferAddress,
                     format: wgpu::VertexFormat::Float32x3,
                     shader_location: 5,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 9]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
                     format: wgpu::VertexFormat::Float32x3,
                     shader_location: 6,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
                     format: wgpu::VertexFormat::Float32x3,
                     shader_location: 7,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
                     format: wgpu::VertexFormat::Float32x3,
                     shader_location: 8,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 21]>() as wgpu::BufferAddress,
                     format: wgpu::VertexFormat::Float32x3,
                     shader_location: 9,
                 },
