@@ -56,19 +56,19 @@ where
         // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         [
             [
-                1.0 - two_s * (y.powi(2) + z.powi(2)),
-                two_s * (x * y + z * angle),
-                two_s * (x * z - y * angle),
+                angle.powi(2) + x.powi(2) - y.powi(2) - z.powi(2),
+                2.0 * x * y + 2.0 * angle * z,
+                2.0 * x * z - 2.0 * angle * y,
             ],
             [
-                two_s * (x * y - z * angle),
-                1.0 - two_s * (x.powi(2) + z.powi(2)),
-                two_s * (y * z + x * angle),
+                2.0 * x * y - 2.0 * angle * z,
+                angle.powi(2) - x.powi(2) + y.powi(2) - z.powi(2),
+                2.0 * y * z + 2.0 * angle * x,
             ],
             [
-                two_s * (x * z + y * angle),
-                two_s * (y * z - x * angle),
-                1.0 - two_s * (x.powi(2) + y.powi(2)),
+                2.0 * x * z + 2.0 * angle * y,
+                2.0 * y * z - 2.0 * angle * x,
+                angle.powi(2) - x.powi(2) - y.powi(2) + z.powi(2),
             ],
         ]
     }
