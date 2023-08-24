@@ -18,6 +18,9 @@ pub struct Camera3D {
     camera_buffer: wgpu::Buffer,
 }
 
+// Implement Looking at different directions
+// Implement Camera position
+// Cleanup
 impl Camera3D {
     pub fn new(fov: f32, screen_width: u32, screen_height: u32, device: &wgpu::Device) -> Self {
         let position = Vector3 {
@@ -33,7 +36,7 @@ impl Camera3D {
         let aspect_ratio = screen_width as f32 / screen_height as f32;
         let z_near: f32 = 0.1;
         let z_far: f32 = 100.0;
-
+        // IMPLEMENT ASPECT RATIO
         let matrix = [
             [1.0 / (fov / 2.0).tan(), 0.0, 0.0, 0.0],
             [0.0, 1.0 / (fov / 2.0).tan(), 0.0, 0.0],

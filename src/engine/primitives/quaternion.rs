@@ -13,7 +13,6 @@ where
 {
     angle: T,
     axis: Vector3<T>,
-    unit: bool,
 }
 
 impl<T> Quaternion<T>
@@ -26,8 +25,8 @@ where
         unit: whether the quaternion is a unit quaternion
             (I am worried about floating point inaccuracies causing scaling)
     */
-    pub fn new(axis: Vector3<T>, angle: T, unit: bool) -> Self {
-        Self { angle, axis, unit }
+    pub fn new(axis: Vector3<T>, angle: T) -> Self {
+        Self { angle, axis }
     }
 
     pub fn set_rotation(&mut self, axis: Vector3<T>, angle: T) {
@@ -41,6 +40,14 @@ where
 
     pub fn angle(&self) -> T {
         self.angle
+    }
+
+    pub fn set_angle(&mut self, angle: T) {
+        self.angle = angle;
+    }
+
+    pub fn set_axis(&mut self, axis: Vector3<T>) {
+        self.axis = axis;
     }
 
     pub fn to_matrix(&self) -> Matrix4<f32> {

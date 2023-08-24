@@ -47,6 +47,14 @@ impl Transformation3D {
         self.rotation = rotation;
     }
 
+    pub fn set_angle(&mut self, angle: f32) {
+        self.rotation.set_angle(angle);
+    }
+
+    pub fn set_axis(&mut self, axis: Vector3<f32>) {
+        self.rotation.set_axis(axis);
+    }
+
     pub fn set_scale(&mut self, scale: f32) {
         self.scale.set(0, 0, scale);
         self.scale.set(1, 1, scale);

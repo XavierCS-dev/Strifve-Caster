@@ -81,7 +81,6 @@ pub struct RenderData {
     camera: Camera3D,
     entity: Entity3D,
     entity_buf: wgpu::Buffer,
-    rot: f32,
 }
 
 impl RenderData {
@@ -139,12 +138,12 @@ impl RenderData {
         });
         let mut ran_vec = Vector3 {
             x: 1.0 as f32,
-            y: 10.0 as f32,
+            y: 1.0 as f32,
             z: 1.0 as f32,
         };
         ran_vec.normalise();
         let rot = 0.0;
-        let rotation = Quaternion::new(ran_vec, rot, true);
+        let rotation = Quaternion::new(ran_vec, rot);
 
         // TODO: 3D Entity Creation
         let texture = Texture2D::new(
@@ -156,13 +155,13 @@ impl RenderData {
         .unwrap();
 
         let entity = Entity3D::new(
-            Some(0),
+            None,
             Vector3 {
-                x: 1.2,
-                y: 1.2,
-                z: 10.0,
+                x: 0.0,
+                y: 0.0,
+                z: 3.0,
             },
-            5.0,
+            1.0,
             rotation,
             Vec::from(VERTICES),
             Vec::new(),
@@ -262,7 +261,6 @@ impl RenderData {
             camera,
             entity,
             entity_buf,
-            rot,
         }
     }
 
@@ -294,12 +292,12 @@ impl RenderData {
 
             let mut ran_vec = Vector3 {
                 x: 1.0 as f32,
-                y: 1.0 as f32,
+                y: 1.5 as f32,
                 z: 1.0 as f32,
             };
             ran_vec.normalise();
-            let rotation = Quaternion::new(ran_vec, self.rot, true);
-            self.entity.set_rotation(rotation);
+            self.entity.set_axis(ran_vec);
+            self.entity.set_angle(self.entity.rotation().angle() - 0.25);
             render_pass.set_pipeline(&self.pipeline);
 
             self.entity_buf = self
@@ -309,7 +307,6 @@ impl RenderData {
                     contents: bytemuck::cast_slice(&[self.entity.to_raw()]),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
-            self.rot -= 0.25;
             // TODO: Implement 3D rendering renderpass
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);

@@ -48,12 +48,14 @@ impl RawEntity3D {
     }
 }
 
-// TODO: Implement Entity3D
-
+// TODO: For th eencapsulating structure.. maybe "Actor",
+// include a flag to disable processing for particular entity
+// Note, all entities should have their vertices centred on the origin
+// this is for rotation
 pub struct Entity3D {
     id: u32,
     texture_id: Option<u32>,
-    // Position in world space
+    // Position in world space, scale, rotation
     transformation: Transformation3D,
     vertices: Vec<Vertex3D>,
     indices: Vec<u32>,
@@ -68,7 +70,6 @@ impl Entity3D {
         vertices: Vec<Vertex3D>,
         indices: Vec<u32>,
     ) -> Self {
-        // origin will need to be calculated instead of being a param
         let id = unsafe { Entity3D::create_id() };
         let transformation = Transformation3D::new(position, rotation, scale);
         Self {
@@ -86,6 +87,14 @@ impl Entity3D {
 
     pub fn set_rotation(&mut self, rotation: Quaternion<f32>) {
         self.transformation.set_rotation(rotation);
+    }
+
+    pub fn set_angle(&mut self, angle: f32) {
+        self.transformation.set_angle(angle);
+    }
+
+    pub fn set_axis(&mut self, axis: Vector3<f32>) {
+        self.transformation.set_axis(axis);
     }
 
     pub fn position(&self) -> Vector3<f32> {
@@ -121,7 +130,6 @@ impl Entity3D {
     }
 
     pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: Vec<u32>) {
-        // Origin will need to be recalculated
         self.vertices = vertices;
         self.indices = indices;
     }
