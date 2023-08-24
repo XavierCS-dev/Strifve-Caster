@@ -81,6 +81,7 @@ pub struct RenderData {
     camera: Camera3D,
     entity: Entity3D,
     entity_buf: wgpu::Buffer,
+    rot: f32,
 }
 
 impl RenderData {
@@ -138,16 +139,12 @@ impl RenderData {
         });
         let mut ran_vec = Vector3 {
             x: 1.0 as f32,
-            y: 1.0 as f32,
+            y: 10.0 as f32,
             z: 1.0 as f32,
         };
         ran_vec.normalise();
-        println!(
-            "{}",
-            (ran_vec.x.powi(2) + ran_vec.y.powi(2) + ran_vec.z.powi(2))
-        );
-        let rotation = Quaternion::new(ran_vec, 45.0, true);
-        println!("{:?}", rotation.to_raw());
+        let rot = 0.0;
+        let rotation = Quaternion::new(ran_vec, rot, true);
 
         // TODO: 3D Entity Creation
         let texture = Texture2D::new(
@@ -167,11 +164,6 @@ impl RenderData {
             },
             1.0,
             rotation,
-            Vector3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
             Vec::from(VERTICES),
             Vec::new(),
         );
@@ -270,6 +262,7 @@ impl RenderData {
             camera,
             entity,
             entity_buf,
+            rot,
         }
     }
 
@@ -298,7 +291,25 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
             self.camera.update(&self.queue, &self.device);
+
+            let mut ran_vec = Vector3 {
+                x: 1.0 as f32,
+                y: 1.0 as f32,
+                z: 1.0 as f32,
+            };
+            ran_vec.normalise();
+            let rotation = Quaternion::new(ran_vec, self.rot, true);
+            self.entity.set_rotation(rotation);
             render_pass.set_pipeline(&self.pipeline);
+
+            self.entity_buf = self
+                .device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Index buf"),
+                    contents: bytemuck::cast_slice(&[self.entity.to_raw()]),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
+            self.rot -= 0.25;
             // TODO: Implement 3D rendering renderpass
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);

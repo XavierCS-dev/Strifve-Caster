@@ -4,14 +4,10 @@
 
 // TODO: Convert to Entity3D
 struct EntityInput {
-    @location(2) position: vec3<f32>,
-    @location(3) rotation_one: vec3<f32>,
-    @location(4) rotation_two: vec3<f32>,
-    @location(5) rotation_three: vec3<f32>,
-    @location(6) origin: vec3<f32>,
-    @location(7) scale_one: vec3<f32>,
-    @location(8) scale_two: vec3<f32>,
-    @location(9) scale_three: vec3<f32>,
+    @location(2) transform_one: vec4<f32>,
+    @location(3) transform_two: vec4<f32>,
+    @location(4) transform_three: vec4<f32>,
+    @location(5) transform_four: vec4<f32>,
 };
 
 struct VertexInput {
@@ -37,30 +33,12 @@ fn vs_main(
     model: VertexInput,
     entity: EntityInput,
 ) -> VertexOutput {
-
-    let rotation = mat4x4<f32> (
-        vec4<f32>(entity.rotation_one, 0.0),
-        vec4<f32>(entity.rotation_two, 0.0),
-        vec4<f32>(entity.rotation_three, 0.0),
-        vec4<f32>(0.0,0.0,0.0,1.0),  
-    );
-    let rot = mat3x3<f32> (
-        entity.rotation_one,
-        entity.rotation_two,
-        entity.rotation_three,
-    );
-    let translation = mat4x4<f32> (
-        vec4<f32>(1.0,0.0,0.0,0.0),
-        vec4<f32>(0.0,1.0,0.0,0.0),
-        vec4<f32>(0.0,0.0,1.0,0.0),
-        vec4<f32>(0.0,0.0,3.0,1.0), 
-    );
-    let transformation = translation * rotation;
-    let scale = mat3x3<f32> (
-        entity.scale_one,
-        entity.scale_two,
-        entity.scale_three,
-    );
+    let transformation = mat4x4<f32>(
+        transform_one,
+        transform_two,
+        transform_three,
+        transform_four,
+    )
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
     out.clip_position = camera_mat * transformation * vec4<f32>(model.position, 1.0);
