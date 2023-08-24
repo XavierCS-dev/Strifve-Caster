@@ -26,19 +26,23 @@ where
     }
 }
 
-impl<f32> Matrix4<f32> {
+impl<T> Matrix4<T>
+where
+    T: NumCast + Copy + Float,
+    [[f32; 4]; 4]: From<[[T; 4]; 4]>,
+{
     pub fn to_raw(&self) -> [[f32; 4]; 4] {
-        self.matrix.into()
+        self.matrix.clone().into()
     }
 }
 
-impl<T> std::ops::Mul<Matrix4<T>> for Matrix4<T>
+impl<T> std::ops::Mul<&Matrix4<T>> for &Matrix4<T>
 where
     T: NumCast + Copy + Float,
 {
     type Output = Matrix4<T>;
 
-    fn mul(self, rhs: Matrix4<T>) -> Self::Output {
+    fn mul(self, rhs: &Matrix4<T>) -> Self::Output {
         // this code can be made cleaner at a later date, it is not a concern for now
         let column_one = [
             rhs[0][0] * self[0][0]

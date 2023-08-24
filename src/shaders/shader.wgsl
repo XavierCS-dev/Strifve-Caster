@@ -34,11 +34,11 @@ fn vs_main(
     entity: EntityInput,
 ) -> VertexOutput {
     let transformation = mat4x4<f32>(
-        transform_one,
-        transform_two,
-        transform_three,
-        transform_four,
-    )
+        entity.transform_one,
+        entity.transform_two,
+        entity.transform_three,
+        entity.transform_four,
+    );
     var out: VertexOutput;
     out.tex_pos = model.tex_pos;
     out.clip_position = camera_mat * transformation * vec4<f32>(model.position, 1.0);

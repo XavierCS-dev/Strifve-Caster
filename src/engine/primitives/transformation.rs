@@ -59,7 +59,8 @@ impl Transformation3D {
     }
 
     pub fn to_raw(&self) -> [[f32; 4]; 4] {
-        (self.scale * self.position * self.rotation.to_matrix()).to_raw()
+        let scale_and_rotate = &self.scale * &self.rotation.to_matrix();
+        (&self.position * &scale_and_rotate).to_raw()
     }
 }
 
