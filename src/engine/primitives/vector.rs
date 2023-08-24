@@ -48,10 +48,10 @@ where
     }
 
     pub fn magnitude(&self) -> T {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
     pub fn square_magnitude(&self) -> T {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 }

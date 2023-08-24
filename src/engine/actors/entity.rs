@@ -6,16 +6,14 @@ use crate::engine::primitives::{transformation::Transformation2D, vector::Vector
 use crate::engine::traits::update_entity::UpdateEntity;
 use rand::Rng;
 use std::sync::Mutex;
+use wgpu::core::command::render_ffi::wgpu_render_pass_draw_indirect;
 
 pub static mut ENTITY_IDS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Zeroable, bytemuck::Pod)]
 pub struct RawEntity3D {
-    position: [f32; 3],
-    rotation: [[f32; 3]; 3],
-    origin: [f32; 3],
-    scale: [[f32; 3]; 3],
+    transformation: [[f32; 4]; 4],
 }
 
 impl RawEntity3D {
@@ -27,59 +25,38 @@ impl RawEntity3D {
             attributes: &[
                 wgpu::VertexAttribute {
                     offset: 0,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32x4,
                     shader_location: 2,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x4,
                     shader_location: 3,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    format: wgpu::VertexFormat::Float32x4,
                     shader_location: 4,
                 },
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 5,
-                },
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 9]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 6,
-                },
-                wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 7,
-                },
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 8,
-                },
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
-                    format: wgpu::VertexFormat::Float32x3,
-                    shader_location: 9,
+                    format: wgpu::VertexFormat::Float32x4,
+                    shader_location: 5,
                 },
             ],
         }
     }
 }
 
-// TODO: Implement Entity3D
-
+// TODO: For th eencapsulating structure.. maybe "Actor",
+// include a flag to disable processing for particular entity
+// Note, all entities should have their vertices centred on the origin
+// this is for rotation
 pub struct Entity3D {
     id: u32,
     texture_id: Option<u32>,
-    // Position in world space
-    position: Vector3<f32>,
-    scale: f32,
-    rotation: Quaternion<f32>,
-    origin: Vector3<f32>,
+    // Position in world space, scale, rotation
+    transformation: Transformation3D,
     vertices: Vec<Vertex3D>,
     indices: Vec<u32>,
 }
@@ -90,46 +67,50 @@ impl Entity3D {
         position: Vector3<f32>,
         scale: f32,
         rotation: Quaternion<f32>,
-        origin: Vector3<f32>,
         vertices: Vec<Vertex3D>,
         indices: Vec<u32>,
     ) -> Self {
-        // origin will need to be calculated instead of being a param
         let id = unsafe { Entity3D::create_id() };
+        let transformation = Transformation3D::new(position, rotation, scale);
         Self {
             id,
             texture_id,
-            position,
-            scale,
-            rotation,
-            origin,
+            transformation,
             vertices,
             indices,
         }
     }
 
     pub fn rotation(&self) -> &Quaternion<f32> {
-        &self.rotation
+        self.transformation.rotation()
     }
 
     pub fn set_rotation(&mut self, rotation: Quaternion<f32>) {
-        self.rotation = rotation;
+        self.transformation.set_rotation(rotation);
     }
 
-    pub fn position(&self) -> &Vector3<f32> {
-        &self.position
+    pub fn set_angle(&mut self, angle: f32) {
+        self.transformation.set_angle(angle);
+    }
+
+    pub fn set_axis(&mut self, axis: Vector3<f32>) {
+        self.transformation.set_axis(axis);
+    }
+
+    pub fn position(&self) -> Vector3<f32> {
+        self.transformation.position()
     }
 
     pub fn set_position(&mut self, position: Vector3<f32>) {
-        self.position = position;
+        self.transformation.set_position(position);
     }
 
     pub fn scale(&self) -> f32 {
-        self.scale
+        self.transformation.scale()
     }
 
     pub fn set_scale(&mut self, scale: f32) {
-        self.scale = scale;
+        self.transformation.set_scale(scale);
     }
 
     pub fn id(&self) -> u32 {
@@ -149,7 +130,6 @@ impl Entity3D {
     }
 
     pub fn set_vertices(&mut self, vertices: Vec<Vertex3D>, indices: Vec<u32>) {
-        // Origin will need to be recalculated
         self.vertices = vertices;
         self.indices = indices;
     }
@@ -167,14 +147,7 @@ impl Entity3D {
 
     pub fn to_raw(&self) -> RawEntity3D {
         RawEntity3D {
-            position: self.position.to_raw(),
-            scale: [
-                [self.scale, 0.0, 0.0],
-                [0.0, self.scale, 0.0],
-                [0.0, 0.0, self.scale],
-            ],
-            origin: self.origin.to_raw(),
-            rotation: self.rotation.to_raw(),
+            transformation: self.transformation.to_raw(),
         }
     }
 }

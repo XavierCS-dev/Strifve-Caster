@@ -142,11 +142,8 @@ impl RenderData {
             z: 1.0 as f32,
         };
         ran_vec.normalise();
-        println!(
-            "{}",
-            (ran_vec.x.powi(2) + ran_vec.y.powi(2) + ran_vec.z.powi(2))
-        );
-        let rotation = Quaternion::new(ran_vec, 45.0, true);
+        let rot = 0.0;
+        let rotation = Quaternion::new(ran_vec, rot);
 
         // TODO: 3D Entity Creation
         let texture = Texture2D::new(
@@ -158,19 +155,14 @@ impl RenderData {
         .unwrap();
 
         let entity = Entity3D::new(
-            Some(0),
-            Vector3 {
-                x: 0.5,
-                y: -0.0,
-                z: 2.0,
-            },
-            0.5,
-            rotation,
+            None,
             Vector3 {
                 x: 0.0,
                 y: 0.0,
-                z: 0.0,
+                z: 3.0,
             },
+            1.0,
+            rotation,
             Vec::from(VERTICES),
             Vec::new(),
         );
@@ -297,7 +289,24 @@ impl RenderData {
                 depth_stencil_attachment: None,
             });
             self.camera.update(&self.queue, &self.device);
+
+            let mut ran_vec = Vector3 {
+                x: 1.0 as f32,
+                y: 1.5 as f32,
+                z: 1.0 as f32,
+            };
+            ran_vec.normalise();
+            self.entity.set_axis(ran_vec);
+            self.entity.set_angle(self.entity.rotation().angle() - 0.25);
             render_pass.set_pipeline(&self.pipeline);
+
+            self.entity_buf = self
+                .device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Index buf"),
+                    contents: bytemuck::cast_slice(&[self.entity.to_raw()]),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
             // TODO: Implement 3D rendering renderpass
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
