@@ -34,6 +34,7 @@ pub async fn run() {
                     *control_flow = ControlFlow::Exit;
                 }
             }
+            Event::DeviceEvent { device_id, event } => render_data.device_event(&event),
             Event::RedrawRequested(window_id) if window_id == render_data.window().id() => {
                 render_data.update();
                 render_data.render().unwrap();

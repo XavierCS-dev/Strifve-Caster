@@ -28,13 +28,12 @@ impl CameraController3D {
 
     pub fn build_transformation(&mut self) -> Matrix4<f32> {
         let magnitude = self.rotation.magnitude();
-        let mut axis = self.rotation;
-        axis.normalise();
-        let axis = Vector3 {
-            x: -axis.y,
-            y: axis.x,
+        let mut axis = Vector3 {
+            x: -self.rotation.y,
+            y: -self.rotation.x,
             z: 0.0,
         };
+        axis.normalise();
         let quat = Quaternion::new(axis, magnitude);
         quat.to_matrix()
     }

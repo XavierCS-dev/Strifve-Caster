@@ -1,6 +1,7 @@
 use super::actors::entity::Entity2D;
 use super::actors::entity::Entity3D;
 use super::actors::entity::RawEntity3D;
+use super::advanced_types::camera_controller::CameraController3D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
@@ -17,6 +18,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
+use winit::event::DeviceEvent;
 use winit::event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent};
 use winit::window::Window;
 
@@ -79,6 +81,7 @@ pub struct RenderData {
     vert_buf: wgpu::Buffer,
     index_buf: wgpu::Buffer,
     camera: Camera3D,
+    camera_controller: CameraController3D,
     entity: Entity3D,
     entity_buf: wgpu::Buffer,
 }
@@ -137,9 +140,9 @@ impl RenderData {
             ],
         });
         let mut ran_vec = Vector3 {
-            x: 1.0 as f32,
+            x: 0.0 as f32,
             y: 1.0 as f32,
-            z: 1.0 as f32,
+            z: 0.0 as f32,
         };
         ran_vec.normalise();
         let rot = 0.0;
@@ -206,6 +209,7 @@ impl RenderData {
         surface.configure(&device, &config);
 
         let camera = Camera3D::new(45.0, config.width, config.height, &device);
+        let camera_controller = CameraController3D::new();
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("pipeline layout"),
@@ -259,6 +263,7 @@ impl RenderData {
             vert_buf,
             index_buf,
             camera,
+            camera_controller,
             entity,
             entity_buf,
         }
@@ -291,9 +296,9 @@ impl RenderData {
             self.camera.update(&self.queue, &self.device);
 
             let mut ran_vec = Vector3 {
-                x: 1.0 as f32,
-                y: 1.5 as f32,
-                z: 1.0 as f32,
+                x: 0.0 as f32,
+                y: 1.0 as f32,
+                z: 0.0 as f32,
             };
             ran_vec.normalise();
             self.entity.set_axis(ran_vec);
@@ -322,6 +327,21 @@ impl RenderData {
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         false
+    }
+
+    pub fn device_event(&mut self, event: &DeviceEvent) {
+        self.window
+            .set_cursor_grab(winit::window::CursorGrabMode::Confined);
+        self.window.set_cursor_visible(false);
+        match event {
+            DeviceEvent::MouseMotion { delta } => {
+                self.camera_controller
+                    .register_movement(delta.0 as f32 * 0.2, delta.1 as f32 * 0.2);
+                self.camera
+                    .look(&self.camera_controller.build_transformation());
+            }
+            _ => (),
+        }
     }
 
     pub fn process_inputs(&mut self, event: &WindowEvent) {}
