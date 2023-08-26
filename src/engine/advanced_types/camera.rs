@@ -1,4 +1,4 @@
-use crate::engine::primitives::vector::Vector3;
+use crate::engine::primitives::{matrix::Matrix4, vector::Vector3};
 use std::ops::Deref;
 use wgpu::util::DeviceExt;
 
@@ -16,6 +16,7 @@ pub struct Camera3D {
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     camera_buffer: wgpu::Buffer,
+    projection: Matrix4<f32>,
     matrix: [[f32; 4]; 4],
 }
 
@@ -44,6 +45,8 @@ impl Camera3D {
             [0.0, 0.0, z_far / (z_far - z_near), 1.0],
             [0.0, 0.0, (-z_far * z_near) / (z_far - z_near), 0.0],
         ];
+        let projection = Matrix4::new(matrix);
+        let matrix = projection.to_raw();
 
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera buffer"),
@@ -85,6 +88,7 @@ impl Camera3D {
             bind_group_layout,
             camera_buffer,
             matrix,
+            projection,
         }
     }
 
@@ -110,6 +114,10 @@ impl Camera3D {
                 resource: self.camera_buffer.as_entire_binding(),
             }],
         });
+    }
+
+    pub fn look(&mut self, transformation: &Matrix4<f32>) {
+        self.matrix = (&self.projection * transformation).to_raw();
     }
 
     // column major

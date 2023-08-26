@@ -18,6 +18,26 @@ where
     }
 }
 
+impl<T> Vector2<T>
+where
+    T: num_traits::Num + Copy + NumCast + Float,
+{
+    pub fn normalise(&mut self) {
+        let magnitude = self.magnitude();
+        self.x = self.x / magnitude;
+        self.y = self.y / magnitude;
+    }
+
+    pub fn magnitude(&self) -> T {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+
+    pub fn square_magnitude(&self) -> T {
+        self.x.powi(2) + self.y.powi(2)
+    }
+}
+
+#[derive(Copy, Clone)]
 pub struct Vector3<T>
 where
     T: num_traits::Num + Copy,
