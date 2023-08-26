@@ -38,7 +38,7 @@ impl Camera3D {
         let z_far: f32 = 100.0;
         // IMPLEMENT ASPECT RATIO
         let matrix = [
-            [1.0 / (fov / 2.0).tan(), 0.0, 0.0, 0.0],
+            [1.0 / (aspect_ratio * (fov / 2.0).tan()), 0.0, 0.0, 0.0],
             [0.0, 1.0 / (fov / 2.0).tan(), 0.0, 0.0],
             [0.0, 0.0, z_far / (z_far - z_near), 1.0],
             [0.0, 0.0, (-z_far * z_near) / (z_far - z_near), 0.0],
@@ -117,7 +117,12 @@ impl Camera3D {
     // column major
     pub fn create_projection_matrix(&self) -> [[f32; 4]; 4] {
         [
-            [1.0 / (self.fov / 2.0).tan(), 0.0, 0.0, 0.0],
+            [
+                1.0 / (self.aspect_ratio * (self.fov / 2.0).tan()),
+                0.0,
+                0.0,
+                0.0,
+            ],
             [0.0, 1.0 / (self.fov / 2.0).tan(), 0.0, 0.0],
             [0.0, 0.0, self.z_far / (self.z_far - self.z_near), 1.0],
             [

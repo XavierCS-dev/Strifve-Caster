@@ -11,7 +11,7 @@ use engine::render_data::{self, RenderData};
 pub async fn run() {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_inner_size(PhysicalSize::new(700, 700))
+        .with_inner_size(PhysicalSize::new(1280, 720))
         .with_title("Strfive Caster")
         .build(&event_loop)
         .unwrap();
