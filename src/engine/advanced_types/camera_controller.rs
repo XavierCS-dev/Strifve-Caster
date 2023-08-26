@@ -20,13 +20,13 @@ impl CameraController3D {
         ]);
         let quat = Quaternion::new(
             Vector3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
+                x: 1.0,
+                y: 1.0,
+                z: 1.0,
             },
             0.0,
         );
-        let rotation = Vector2 { x: 0.0, y: 0.0 };
+        let rotation = Vector2 { x: 1.0, y: 1.0 };
         Self {
             position,
             rotation,
@@ -34,9 +34,9 @@ impl CameraController3D {
         }
     }
 
-    pub fn process_keyboard(&mut self, dx: f32, dy: f32) {
-        self.position.set(3, 0, self.position.get(3, 1) + dx);
-        self.position.set(3, 1, self.position.get(3, 1) + dy);
+    pub fn process_keyboard(&mut self, dx: f32, dz: f32) {
+        self.position.set(3, 0, self.position.get(3, 0) + dx);
+        self.position.set(3, 2, self.position.get(3, 2) + dz);
     }
 
     pub fn process_camera(&mut self, dx: f32, dy: f32) {

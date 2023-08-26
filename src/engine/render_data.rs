@@ -293,6 +293,9 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
+
+            self.camera
+                .look(&self.camera_controller.build_transformation());
             self.camera.update(&self.queue, &self.device);
 
             let mut ran_vec = Vector3 {
@@ -334,14 +337,38 @@ impl RenderData {
             DeviceEvent::MouseMotion { delta } => {
                 self.camera_controller
                     .process_camera(delta.0 as f32 * 0.2, delta.1 as f32 * 0.2);
-                self.camera
-                    .look(&self.camera_controller.build_transformation());
             }
             _ => (),
         }
     }
 
-    pub fn process_inputs(&mut self, event: &WindowEvent) {}
+    pub fn process_inputs(&mut self, event: &WindowEvent) {
+        match event {
+            WindowEvent::KeyboardInput {
+                input:
+                    KeyboardInput {
+                        virtual_keycode: Some(key),
+                        state: ElementState::Pressed,
+                        ..
+                    },
+                ..
+            } => {
+                if key == &VirtualKeyCode::W {
+                    self.camera_controller.process_keyboard(0.0, -0.1);
+                }
+                if key == &VirtualKeyCode::S {
+                    self.camera_controller.process_keyboard(0.0, 0.1);
+                }
+                if key == &VirtualKeyCode::D {
+                    self.camera_controller.process_keyboard(-0.1, 0.0);
+                }
+                if key == &VirtualKeyCode::A {
+                    self.camera_controller.process_keyboard(0.1, 0.0);
+                }
+            }
+            _ => (),
+        }
+    }
 
     pub fn window(&self) -> &Window {
         &self.window
