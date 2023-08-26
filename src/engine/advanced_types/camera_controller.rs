@@ -5,25 +5,56 @@ use crate::engine::primitives::{
 };
 
 pub struct CameraController3D {
-    position: Vector3<f32>,
+    position: Matrix4<f32>,
     rotation: Vector2<f32>,
+    quat: Quaternion<f32>,
 }
 
 impl CameraController3D {
     pub fn new() -> Self {
-        let position = Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        };
+        let position = Matrix4::new([
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]);
+        let quat = Quaternion::new(
+            Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            0.0,
+        );
         let rotation = Vector2 { x: 0.0, y: 0.0 };
-        Self { position, rotation }
+        Self {
+            position,
+            rotation,
+            quat,
+        }
     }
 
-    pub fn register_movement(&mut self, dx: f32, dy: f32) {
-        self.rotation.x = (self.rotation.x + dx) % 360.0;
-        // might wanna limit the range to +- 90.0 to stop weird 360 rot
-        self.rotation.y = (self.rotation.y + dy) % 360.0;
+    pub fn process_keyboard(&mut self, dx: f32, dy: f32) {
+        self.position.set(3, 0, self.position.get(3, 1) + dx);
+        self.position.set(3, 1, self.position.get(3, 1) + dy);
+    }
+
+    pub fn process_camera(&mut self, dx: f32, dy: f32) {
+        self.rotation.x += dx;
+        self.rotation.y += dy;
+        if self.rotation.x > 180.0 {
+            self.rotation.x = (self.rotation.x % 180.0) - 180.0;
+        } else if self.rotation.x < -180.0 {
+            self.rotation.x = (self.rotation.x % 180.0) + 180.0;
+        }
+        if self.rotation.y > 90.0 {
+            self.rotation.y = 90.0;
+        } else if self.rotation.y < -90.0 {
+            self.rotation.y = -90.0;
+        }
+        println!("dx: {}, dy: {}", dx, dy);
+        println!("y rot: {}", self.rotation.y);
+        println!("x rot: {}", self.rotation.x);
     }
 
     pub fn build_transformation(&mut self) -> Matrix4<f32> {
@@ -34,7 +65,8 @@ impl CameraController3D {
             z: 0.0,
         };
         axis.normalise();
-        let quat = Quaternion::new(axis, magnitude);
-        quat.to_matrix()
+        self.quat.set_axis(axis);
+        self.quat.set_angle(magnitude);
+        &self.quat.to_matrix() * &self.position
     }
 }

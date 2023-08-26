@@ -330,13 +330,10 @@ impl RenderData {
     }
 
     pub fn device_event(&mut self, event: &DeviceEvent) {
-        self.window
-            .set_cursor_grab(winit::window::CursorGrabMode::Confined);
-        self.window.set_cursor_visible(false);
         match event {
             DeviceEvent::MouseMotion { delta } => {
                 self.camera_controller
-                    .register_movement(delta.0 as f32 * 0.2, delta.1 as f32 * 0.2);
+                    .process_camera(delta.0 as f32 * 0.2, delta.1 as f32 * 0.2);
                 self.camera
                     .look(&self.camera_controller.build_transformation());
             }

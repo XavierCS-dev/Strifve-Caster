@@ -15,6 +15,10 @@ pub async fn run() {
         .with_title("Strfive Caster")
         .build(&event_loop)
         .unwrap();
+    window
+        .set_cursor_grab(winit::window::CursorGrabMode::Confined)
+        .unwrap();
+    window.set_cursor_visible(false);
     window.set_resizable(false);
     let mut render_data = RenderData::new(window).await;
     event_loop.run(move |event, _, control_flow| {
