@@ -1,6 +1,7 @@
 use super::actors::entity::Entity2D;
 use super::actors::entity::Entity3D;
 use super::actors::entity::RawEntity3D;
+use super::advanced_types::camera_controller::CameraController3D;
 use super::traits::update_textures::UpdateTextures;
 use crate::engine::actors::entity::RawEntity2D;
 use crate::engine::advanced_types::batch::Batch2D;
@@ -17,6 +18,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use wgpu::Face::Back;
 use wgpu::{util::DeviceExt, BindGroupLayout, RenderPassDescriptor, RenderPipelineDescriptor};
+use winit::event::DeviceEvent;
 use winit::event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent};
 use winit::window::Window;
 
@@ -79,6 +81,7 @@ pub struct RenderData {
     vert_buf: wgpu::Buffer,
     index_buf: wgpu::Buffer,
     camera: Camera3D,
+    camera_controller: CameraController3D,
     entity: Entity3D,
     entity_buf: wgpu::Buffer,
 }
@@ -137,9 +140,9 @@ impl RenderData {
             ],
         });
         let mut ran_vec = Vector3 {
-            x: 1.0 as f32,
+            x: 0.0 as f32,
             y: 1.0 as f32,
-            z: 1.0 as f32,
+            z: 0.0 as f32,
         };
         ran_vec.normalise();
         let rot = 0.0;
@@ -170,7 +173,7 @@ impl RenderData {
         let entity_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index buf"),
             contents: bytemuck::cast_slice(&[entity.to_raw()]),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         let vert_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -206,6 +209,7 @@ impl RenderData {
         surface.configure(&device, &config);
 
         let camera = Camera3D::new(45.0, config.width, config.height, &device);
+        let camera_controller = CameraController3D::new();
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("pipeline layout"),
@@ -259,6 +263,7 @@ impl RenderData {
             vert_buf,
             index_buf,
             camera,
+            camera_controller,
             entity,
             entity_buf,
         }
@@ -288,25 +293,26 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
+
+            self.camera
+                .look(&self.camera_controller.build_transformation());
             self.camera.update(&self.queue, &self.device);
 
             let mut ran_vec = Vector3 {
-                x: 1.0 as f32,
-                y: 1.5 as f32,
-                z: 1.0 as f32,
+                x: 0.0 as f32,
+                y: 1.0 as f32,
+                z: 0.0 as f32,
             };
             ran_vec.normalise();
             self.entity.set_axis(ran_vec);
             self.entity.set_angle(self.entity.rotation().angle() - 0.25);
             render_pass.set_pipeline(&self.pipeline);
 
-            self.entity_buf = self
-                .device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("Index buf"),
-                    contents: bytemuck::cast_slice(&[self.entity.to_raw()]),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
+            self.queue.write_buffer(
+                &self.entity_buf,
+                0,
+                bytemuck::cast_slice(&[self.entity.to_raw()]),
+            );
             // TODO: Implement 3D rendering renderpass
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
@@ -326,7 +332,47 @@ impl RenderData {
         false
     }
 
-    pub fn process_inputs(&mut self, event: &WindowEvent) {}
+    pub fn device_event(&mut self, event: &DeviceEvent) {
+        match event {
+            DeviceEvent::MouseMotion { delta } => {
+                self.camera_controller
+                    .process_camera(delta.0 as f32 * 0.2, delta.1 as f32 * 0.2);
+            }
+            _ => (),
+        }
+    }
+
+    pub fn process_inputs(&mut self, event: &WindowEvent) -> bool {
+        match event {
+            WindowEvent::KeyboardInput {
+                input:
+                    KeyboardInput {
+                        virtual_keycode: Some(key),
+                        state: ElementState::Pressed,
+                        ..
+                    },
+                ..
+            } => {
+                if key == &VirtualKeyCode::W {
+                    self.camera_controller.process_keyboard(0.0, -0.1);
+                }
+                if key == &VirtualKeyCode::S {
+                    self.camera_controller.process_keyboard(0.0, 0.1);
+                }
+                if key == &VirtualKeyCode::D {
+                    self.camera_controller.process_keyboard(-0.1, 0.0);
+                }
+                if key == &VirtualKeyCode::A {
+                    self.camera_controller.process_keyboard(0.1, 0.0);
+                }
+                if key == &VirtualKeyCode::Escape {
+                    return true;
+                }
+            }
+            _ => (),
+        }
+        false
+    }
 
     pub fn window(&self) -> &Window {
         &self.window

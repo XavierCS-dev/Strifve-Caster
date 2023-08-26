@@ -1,4 +1,4 @@
-use crate::engine::primitives::vector::Vector3;
+use crate::engine::primitives::{matrix::Matrix4, vector::Vector3};
 use std::ops::Deref;
 use wgpu::util::DeviceExt;
 
@@ -16,6 +16,8 @@ pub struct Camera3D {
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     camera_buffer: wgpu::Buffer,
+    projection: Matrix4<f32>,
+    matrix: [[f32; 4]; 4],
 }
 
 // Implement Looking at different directions
@@ -38,11 +40,13 @@ impl Camera3D {
         let z_far: f32 = 100.0;
         // IMPLEMENT ASPECT RATIO
         let matrix = [
-            [1.0 / (fov / 2.0).tan(), 0.0, 0.0, 0.0],
+            [1.0 / (aspect_ratio * (fov / 2.0).tan()), 0.0, 0.0, 0.0],
             [0.0, 1.0 / (fov / 2.0).tan(), 0.0, 0.0],
             [0.0, 0.0, z_far / (z_far - z_near), 1.0],
             [0.0, 0.0, (-z_far * z_near) / (z_far - z_near), 0.0],
         ];
+        let projection = Matrix4::new(matrix);
+        let matrix = projection.to_raw();
 
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera buffer"),
@@ -83,6 +87,8 @@ impl Camera3D {
             bind_group,
             bind_group_layout,
             camera_buffer,
+            matrix,
+            projection,
         }
     }
 
@@ -99,11 +105,7 @@ impl Camera3D {
     }
 
     pub fn update(&mut self, queue: &wgpu::Queue, device: &wgpu::Device) {
-        queue.write_buffer(
-            &self.camera_buffer,
-            0,
-            bytemuck::cast_slice(&self.create_projection_matrix()),
-        );
+        queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&self.matrix));
         self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Camera bind group"),
             layout: &self.bind_group_layout,
@@ -114,10 +116,19 @@ impl Camera3D {
         });
     }
 
+    pub fn look(&mut self, transformation: &Matrix4<f32>) {
+        self.matrix = (&self.projection * transformation).to_raw();
+    }
+
     // column major
     pub fn create_projection_matrix(&self) -> [[f32; 4]; 4] {
         [
-            [1.0 / (self.fov / 2.0).tan(), 0.0, 0.0, 0.0],
+            [
+                1.0 / (self.aspect_ratio * (self.fov / 2.0).tan()),
+                0.0,
+                0.0,
+                0.0,
+            ],
             [0.0, 1.0 / (self.fov / 2.0).tan(), 0.0, 0.0],
             [0.0, 0.0, self.z_far / (self.z_far - self.z_near), 1.0],
             [
