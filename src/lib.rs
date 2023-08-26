@@ -32,7 +32,7 @@ pub async fn run() {
                     WindowEvent::CloseRequested => control_flow.set_exit(),
                     _ => {}
                 }
-                if render_data.input(&event) {
+                if render_data.process_inputs(&event) {
                     // This needs an extra match statement, as the window will close if the user is
                     // not holding down a key or doing some other input
                     *control_flow = ControlFlow::Exit;

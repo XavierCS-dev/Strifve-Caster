@@ -342,7 +342,7 @@ impl RenderData {
         }
     }
 
-    pub fn process_inputs(&mut self, event: &WindowEvent) {
+    pub fn process_inputs(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::KeyboardInput {
                 input:
@@ -365,9 +365,13 @@ impl RenderData {
                 if key == &VirtualKeyCode::A {
                     self.camera_controller.process_keyboard(0.1, 0.0);
                 }
+                if key == &VirtualKeyCode::Escape {
+                    return true;
+                }
             }
             _ => (),
         }
+        false
     }
 
     pub fn window(&self) -> &Window {
