@@ -16,6 +16,7 @@ pub struct Camera3D {
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     camera_buffer: wgpu::Buffer,
+    matrix: [[f32; 4]; 4],
 }
 
 // Implement Looking at different directions
@@ -83,6 +84,7 @@ impl Camera3D {
             bind_group,
             bind_group_layout,
             camera_buffer,
+            matrix,
         }
     }
 
@@ -99,11 +101,7 @@ impl Camera3D {
     }
 
     pub fn update(&mut self, queue: &wgpu::Queue, device: &wgpu::Device) {
-        queue.write_buffer(
-            &self.camera_buffer,
-            0,
-            bytemuck::cast_slice(&self.create_projection_matrix()),
-        );
+        queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&self.matrix));
         self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Camera bind group"),
             layout: &self.bind_group_layout,

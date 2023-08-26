@@ -170,7 +170,7 @@ impl RenderData {
         let entity_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index buf"),
             contents: bytemuck::cast_slice(&[entity.to_raw()]),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         let vert_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -300,13 +300,11 @@ impl RenderData {
             self.entity.set_angle(self.entity.rotation().angle() - 0.25);
             render_pass.set_pipeline(&self.pipeline);
 
-            self.entity_buf = self
-                .device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("Index buf"),
-                    contents: bytemuck::cast_slice(&[self.entity.to_raw()]),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
+            self.queue.write_buffer(
+                &self.entity_buf,
+                0,
+                bytemuck::cast_slice(&[self.entity.to_raw()]),
+            );
             // TODO: Implement 3D rendering renderpass
             render_pass.set_bind_group(0, self.texture.bind_group(), &[]);
             render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
