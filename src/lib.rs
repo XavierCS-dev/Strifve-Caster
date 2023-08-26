@@ -24,6 +24,10 @@ pub async fn run() {
                 window_id,
                 ref event,
             } if window_id == render_data.window().id() => {
+                match event {
+                    WindowEvent::CloseRequested => control_flow.set_exit(),
+                    _ => {}
+                }
                 if render_data.input(&event) {
                     // This needs an extra match statement, as the window will close if the user is
                     // not holding down a key or doing some other input
