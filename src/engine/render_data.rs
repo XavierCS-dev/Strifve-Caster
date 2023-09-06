@@ -293,10 +293,11 @@ impl RenderData {
                 })],
                 depth_stencil_attachment: None,
             });
-
+            /*
             self.camera
                 .look(&self.camera_controller.build_transformation());
             self.camera.update(&self.queue, &self.device);
+            */
 
             let mut ran_vec = Vector3 {
                 x: 0.0 as f32,
