@@ -116,10 +116,6 @@ impl Camera3D {
         });
     }
 
-    pub fn look(&mut self, transformation: &Matrix4<f32>) {
-        self.matrix = (&self.projection * transformation).to_raw();
-    }
-
     // column major
     pub fn create_projection_matrix(&self) -> [[f32; 4]; 4] {
         [
