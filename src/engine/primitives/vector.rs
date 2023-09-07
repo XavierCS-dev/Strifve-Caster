@@ -74,4 +74,16 @@ where
     pub fn square_magnitude(&self) -> T {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
+
+    pub fn dot(&self, rhs: &Vector3<T>) -> T {
+        self.x * rhs.x + self.y * rhs.y
+    }
+
+    pub fn cross(&self, rhs: &Vector3<T>) -> Vector3<T> {
+        Vector3 {
+            x: self.y * rhs.z - self.z * rhs.y,
+            y: self.z * rhs.x - self.x * rhs.z,
+            z: self.x * rhs.y - self.y * rhs.x,
+        }
+    }
 }

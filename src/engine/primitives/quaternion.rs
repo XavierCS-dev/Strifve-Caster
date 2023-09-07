@@ -27,13 +27,14 @@ where
     */
     pub fn new(axis: Vector3<T>, angle: T) -> Self {
         let mut axis = axis;
+        let angle = angle.to_radians();
         axis.normalise();
         Self { angle, axis }
     }
 
     pub fn set_rotation(&mut self, axis: Vector3<T>, angle: T) {
         self.axis = axis;
-        self.angle = angle;
+        self.angle = angle.to_radians();
     }
 
     pub fn axis(&self) -> &Vector3<T> {
@@ -41,11 +42,11 @@ where
     }
 
     pub fn angle(&self) -> T {
-        self.angle
+        self.angle.to_degrees()
     }
 
     pub fn set_angle(&mut self, angle: T) {
-        self.angle = angle;
+        self.angle = angle.to_radians();
     }
 
     pub fn set_axis(&mut self, axis: Vector3<T>) {
@@ -57,8 +58,8 @@ where
     }
 
     pub fn to_raw(&self) -> [[f32; 4]; 4] {
-        let w = (self.angle.to_f32().unwrap().to_radians() / 2.0).cos();
-        let angle = self.angle.to_f32().unwrap().to_radians();
+        let w = (self.angle.to_f32().unwrap() / 2.0).cos();
+        let angle = self.angle.to_f32().unwrap();
         let x = self.axis.x.to_f32().unwrap() * (angle / 2.0).sin();
         let y = self.axis.y.to_f32().unwrap() * (angle / 2.0).sin();
         let z = self.axis.z.to_f32().unwrap() * (angle / 2.0).sin();
