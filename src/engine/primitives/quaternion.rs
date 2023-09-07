@@ -26,6 +26,8 @@ where
             (I am worried about floating point inaccuracies causing scaling)
     */
     pub fn new(axis: Vector3<T>, angle: T) -> Self {
+        let mut axis = axis;
+        axis.normalise();
         Self { angle, axis }
     }
 
